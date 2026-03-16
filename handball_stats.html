@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Håndballstatistikk</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--surface:#161a22;--card:#1e2430;--border:#2a3040;
+  --accent:#e8321a;--a2:#f7931e;--green:#22c55e;--red:#ef4444;
+  --blue:#3b82f6;--yellow:#eab308;--purple:#8b5cf6;
+  --text:#f0f2f5;--muted:#6b7a94;
+  --fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;}
+header{background:var(--surface);border-bottom:2px solid var(--accent);padding:0 10px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;gap:8px;}
+.logo{font-family:var(--fd);font-weight:800;font-size:1.2rem;letter-spacing:.04em;white-space:nowrap;}
+.logo span{color:var(--accent);}
+.hm{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.score{display:flex;align-items:center;gap:6px;font-family:var(--fd);font-size:1.5rem;font-weight:800;white-space:nowrap;}
+.sh{color:var(--a2);}.ss{color:var(--muted);}.sa{color:var(--blue);}
+.pb{font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:3px;padding:1px 7px;}
+.pb.on{color:var(--green);border-color:var(--green);}.pb.ht{color:var(--yellow);border-color:var(--yellow);}
+nav{display:flex;gap:3px;}
+.nt{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--fd);font-size:.76rem;font-weight:700;letter-spacing:.05em;padding:4px 9px;border-radius:4px;cursor:pointer;transition:all .15s;text-transform:uppercase;white-space:nowrap;}
+.nt.on,.nt:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+.page{display:none;padding:12px;max-width:880px;margin:0 auto;}
+.page.on{display:block;}
+.stitle{font-family:var(--fd);font-size:1rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+/* BUTTONS */
+.btn{background:var(--accent);border:none;border-radius:4px;color:#fff;cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.82rem;letter-spacing:.05em;padding:7px 14px;text-transform:uppercase;transition:opacity .15s;white-space:nowrap;}
+.btn:hover{opacity:.85;}
+.sec{background:var(--card)!important;border:1px solid var(--border)!important;color:var(--text)!important;}
+.dng{background:var(--red)!important;}
+.grn{background:var(--green)!important;}
+.blu{background:var(--blue)!important;}
+.ylw{background:var(--yellow)!important;color:#111!important;}
+/* SETUP */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+@media(max-width:560px){.sg{grid-template-columns:1fr;}}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px;}
+.sc h3{font-family:var(--fd);font-weight:700;font-size:.92rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px;}
+.ht2{color:var(--a2);}.at{color:var(--blue);}
+.ir{display:flex;gap:6px;margin-bottom:7px;align-items:center;}
+.ir input{background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--fb);font-size:.86rem;padding:6px 8px;flex:1;transition:border-color .15s;}
+.ir input:focus{outline:none;border-color:var(--accent);}
+.ir input.nm{width:50px;flex:none;}
+.pl{list-style:none;}
+.pl li{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.pl li:last-child{border-bottom:none;}
+.pb2{background:var(--bg);border:1px solid var(--border);border-radius:3px;font-family:var(--fd);font-weight:700;font-size:.83rem;padding:1px 6px;margin-right:6px;min-width:28px;text-align:center;display:inline-block;}
+.rb{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:2px 5px;border-radius:3px;transition:color .15s;}
+.rb:hover{color:var(--red);}
+.gkb{background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;font-size:.78rem;padding:2px 7px;transition:all .15s;white-space:nowrap;}
+.gkb:hover{border-color:var(--a2);color:var(--a2);}
+.gkb.on{background:rgba(247,147,30,.15);border-color:var(--a2);color:var(--a2);font-weight:700;}
+.saved-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:6px 10px;margin-bottom:5px;font-size:.84rem;gap:8px;}
+.saved-item strong{font-family:var(--fd);font-size:.9rem;}
+/* MATCH CTRL */
+.mc{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+/* KAMP */
+.kl{display:flex;flex-direction:column;gap:10px;}
+.ts{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.th{padding:8px 12px;font-family:var(--fd);font-weight:800;font-size:.92rem;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.th.home{background:rgba(247,147,30,.1);border-bottom:2px solid var(--a2);}
+.th.away{background:rgba(59,130,246,.1);border-bottom:2px solid var(--blue);}
+.tsb{font-size:1.3rem;font-weight:900;}
+.pg{display:flex;flex-wrap:wrap;gap:5px;padding:9px 11px;border-bottom:1px solid var(--border);}
+.pbtn{background:var(--bg);border:2px solid var(--border);border-radius:5px;color:var(--text);cursor:pointer;font-family:var(--fd);font-weight:600;font-size:.8rem;padding:5px 8px;transition:all .12s;display:flex;align-items:center;gap:4px;}
+.pbtn .pn{background:var(--border);border-radius:3px;padding:0 4px;font-size:.73rem;font-weight:800;}
+.pbtn.on.home{border-color:var(--a2);background:rgba(247,147,30,.15);}
+.pbtn.on.away{border-color:var(--blue);background:rgba(59,130,246,.15);}
+.pbtn:hover{border-color:var(--muted);}
+.ap{padding:9px 11px;}
+.ag{margin-bottom:9px;}
+.agt{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.abs{display:flex;flex-wrap:wrap;gap:5px;}
+.ab{border:none;border-radius:5px;cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.78rem;letter-spacing:.03em;padding:7px 10px;transition:opacity .12s,transform .1s;color:#fff;}
+.ab:active{transform:scale(.95);}.ab:hover{opacity:.85;}
+.ab.m{background:var(--green);}.ab.b{background:var(--red);}
+.ab.a{background:var(--purple);}.ab.tf{background:var(--yellow);color:#111;}
+.ab.rd{background:var(--blue);}.ab.z{background:#0d7bb5;}
+.ab.s1{background:#0891b2;}.ab.s2{background:#0e7490;}
+.warn{background:rgba(234,179,8,.1);border:1px solid var(--yellow);border-radius:5px;color:var(--yellow);font-size:.81rem;font-weight:600;padding:6px 11px;margin-bottom:7px;display:none;}
+.warn.on{display:block;}
+/* POPUPS */
+.pop{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;display:none;align-items:center;justify-content:center;}
+.pop.on{display:flex;}
+.pb3{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;width:min(390px,94vw);max-height:90vh;overflow-y:auto;}
+.pb3 h3{font-family:var(--fd);font-weight:800;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;text-align:center;}
+/* ZONE */
+.zr{display:flex;gap:6px;justify-content:center;margin-bottom:6px;}
+.zb{background:var(--card);border:2px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.76rem;padding:8px 9px;text-align:center;transition:all .12s;flex:1;min-width:68px;}
+.zb:hover,.zb.on{border-color:var(--blue);background:rgba(59,130,246,.18);}
+.or{display:none;gap:8px;margin-top:9px;justify-content:center;flex-wrap:wrap;}
+.or.on{display:flex;}
+.ob{background:var(--card);border:2px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.84rem;padding:9px 16px;transition:all .12s;}
+.ob.m{border-color:var(--green);color:var(--green);}.ob.m:hover{background:rgba(34,197,94,.15);}
+.ob.b{border-color:var(--red);color:var(--red);}.ob.b:hover{background:rgba(239,68,68,.15);}
+.ob.r{border-color:var(--blue);color:var(--blue);}.ob.r:hover{background:rgba(59,130,246,.15);}
+/* KEEPER */
+.kw{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.kl2{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.kbs{display:flex;flex-wrap:wrap;gap:5px;}
+.kb{background:var(--bg);border:2px solid var(--border);border-radius:5px;color:var(--text);cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.78rem;padding:5px 10px;transition:all .12s;}
+.kb.on{border-color:var(--a2);background:rgba(247,147,30,.18);}
+.kb:hover{border-color:var(--muted);}
+/* ASSIST */
+.ag2{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.apb{background:var(--card);border:2px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.82rem;padding:8px 12px;transition:all .12s;display:flex;align-items:center;gap:5px;}
+.apb .an{background:var(--border);border-radius:3px;padding:0 5px;font-size:.75rem;font-weight:800;}
+.apb:hover{border-color:var(--purple);background:rgba(139,92,246,.18);}
+/* TEKFEIL */
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px;}
+.tb{background:var(--card);border:2px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.82rem;padding:11px 10px;text-align:center;transition:all .12s;}
+.tb:hover{border-color:var(--yellow);background:rgba(234,179,8,.15);color:var(--yellow);}
+/* ROSTER */
+.rg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.rbt{background:var(--card);border:2px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.82rem;padding:8px 12px;transition:all .12s;display:flex;align-items:center;gap:5px;}
+.rbt .rn{background:var(--border);border-radius:3px;padding:0 5px;font-size:.75rem;font-weight:800;}
+.rbt.on{border-color:var(--a2);background:rgba(247,147,30,.18);}
+.rbt:hover{border-color:var(--muted);}
+/* TOAST */
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px 16px;font-family:var(--fd);font-weight:700;font-size:.88rem;z-index:300;transition:transform .25s ease;pointer-events:none;white-space:nowrap;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+/* LOG */
+.lc{display:flex;gap:5px;margin-bottom:9px;flex-wrap:wrap;}
+.lf{background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--fd);font-weight:600;font-size:.76rem;padding:4px 10px;cursor:pointer;transition:all .12s;text-transform:uppercase;letter-spacing:.04em;}
+.lf.on,.lf:hover{background:var(--accent);border-color:var(--accent);}
+.le{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:7px 11px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;font-size:.84rem;gap:7px;}
+.el{display:flex;align-items:center;gap:7px;flex:1;flex-wrap:wrap;}
+.lt{font-family:var(--fd);font-weight:700;font-size:.74rem;color:var(--muted);min-width:36px;}
+.lp{font-family:var(--fd);font-weight:700;font-size:.72rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1px 5px;}
+.tag{border-radius:3px;font-family:var(--fd);font-weight:700;font-size:.7rem;padding:2px 6px;text-transform:uppercase;letter-spacing:.04em;color:#fff;white-space:nowrap;}
+.tag.maal{background:var(--green);}.tag.bom{background:var(--red);}
+.tag.assist{background:var(--purple);}.tag.tekfeil{background:var(--yellow);color:#111;}
+.tag.redning{background:var(--blue);}.tag.zone{background:#0d7bb5;}
+.tag.syvtildelt{background:#0891b2;}.tag.syvforaarsaket{background:#0e7490;}
+.ub{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:.73rem;padding:3px 6px;transition:all .12s;}
+.ub:hover{border-color:var(--red);color:var(--red);}
+/* STATS */
+.smg{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;margin-bottom:12px;}
+.smc{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px;text-align:center;}
+.sl{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.sv{font-family:var(--fd);font-size:1.6rem;font-weight:800;}
+.ss2{margin-bottom:18px;}
+.st{width:100%;border-collapse:collapse;font-size:.83rem;}
+.st th{background:var(--surface);border:1px solid var(--border);font-family:var(--fd);font-weight:700;font-size:.73rem;letter-spacing:.06em;padding:6px 8px;text-align:left;text-transform:uppercase;color:var(--muted);}
+.st td{border:1px solid var(--border);padding:6px 8px;}
+.st tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.nc{font-family:var(--fd);font-weight:700;font-size:.9rem;text-align:center!important;}
+.eb{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+/* ACCORDION */
+.acc-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:5px;margin-top:8px;user-select:none;}
+.acc-hdr:hover{border-color:var(--muted);}
+.acc-title{font-family:var(--fd);font-weight:700;font-size:.82rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.acc-arrow{font-size:.8rem;color:var(--muted);transition:transform .2s;}
+.acc-arrow.open{transform:rotate(180deg);}
+.acc-body{display:none;margin-top:4px;}
+.acc-body.open{display:block;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">HÅNDBALL<span>STAT</span></div>
+  <div class="hm">
+    <div class="score"><span class="sh" id="hH">0</span><span class="ss">–</span><span class="sa" id="hA">0</span></div>
+    <span class="pb" id="pBadge">Ikke startet</span>
+  </div>
+  <nav>
+    <button class="nt on" onclick="goPage('setup')">Oppsett</button>
+    <button class="nt" onclick="goPage('kamp')">Kamp</button>
+    <button class="nt" onclick="goPage('log')">Logg</button>
+    <button class="nt" onclick="goPage('stats')">Stats</button>
+    <button class="nt" onclick="goPage('total')">Totalt</button>
+    <button class="nt" onclick="goPage('arkiv')">Arkiv</button>
+    <a class="nt" href="trening.html" style="text-decoration:none;">🏋 Trening</a>
+    <a class="nt" href="taktikk.html" style="text-decoration:none;">🎯 Taktikk</a>
+  </nav>
+</header>
+
+<!-- SETUP -->
+<div id="page-setup" class="page on">
+  <div class="sg">
+    <div class="sc">
+      <h3 class="ht2">🏠 Hjemmelag</h3>
+      <div class="ir">
+        <input type="text" id="homeTeamName" placeholder="Lagnavn" value="Hjemmelag">
+        <button class="btn sec" onclick="saveHomeSquad()">💾</button>
+      </div>
+      <div id="homeSquadList"></div>
+      <div class="ir" style="margin-top:6px;">
+        <input type="text" id="homeNum" class="nm" placeholder="#" maxlength="3">
+        <input type="text" id="homeName" placeholder="Spillernavn">
+        <button class="btn" onclick="addPlayer('home')">+</button>
+      </div>
+      <ul class="pl" id="homePL"></ul>
+    </div>
+    <div class="sc">
+      <h3 class="at">✈️ Bortelag</h3>
+      <div id="awaySquadList"></div>
+      <div class="ir">
+        <input type="text" id="awayTeamName" placeholder="Lagnavn" value="Bortelag">
+        <button class="btn sec" onclick="saveAwaySquad()">💾</button>
+      </div>
+      <div class="ir">
+        <input type="text" id="awayNum" class="nm" placeholder="#" maxlength="3">
+        <input type="text" id="awayName" placeholder="Spillernavn">
+        <button class="btn" onclick="addPlayer('away')">+</button>
+      </div>
+      <ul class="pl" id="awayPL"></ul>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:14px;">
+    <button class="btn grn" onclick="startMatch()" style="font-size:1rem;padding:12px 28px;">▶ Start kamp</button>
+  </div>
+</div>
+
+<!-- KAMP -->
+<div id="page-kamp" class="page">
+  <div class="mc" id="matchCtrl">
+    <span style="font-family:var(--fd);font-weight:700;font-size:.9rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Kamp:</span>
+    <button class="btn ylw" id="bHT">⏸ Halvtid</button>
+    <button class="btn grn" id="bP2" style="display:none">▶ 2. omgang</button>
+    <button class="btn dng" id="bEnd">🏁 Avslutt</button>
+    <button class="btn sec" onclick="openPop('savePop')">💾 Lagre</button>
+  </div>
+  <div class="kl">
+    <div class="ts">
+      <div class="th home"><span id="hLabel">Hjemmelag</span><span class="tsb" style="color:var(--a2)" id="sH">0</span></div>
+      <div class="pg" id="homePG"></div>
+      <div class="ap">
+        <div class="warn" id="warnHome">Velg spiller først!</div>
+        <div class="ag"><div class="agt">Scoring</div><div class="abs">
+          <button class="ab m" onclick="doHomeMaal()">⚽ Mål</button>
+          <button class="ab b" onclick="doAct('home','bom')">✖ Bom</button>
+        </div></div>
+        <div class="ag"><div class="agt">Skuddzone</div><div class="abs">
+          <button class="ab z" onclick="openZone('home')">🎯 Skuddzone</button>
+        </div></div>
+        <div class="ag"><div class="agt">Annet</div><div class="abs">
+          <button class="ab tf" onclick="openTF('home')">⚠ Teknisk feil</button>
+          <button class="ab rd" onclick="doAct('home','redning')">🧤 Redning</button>
+          <button class="ab s1" onclick="doAct('home','syvtildelt')">7m tildelt</button>
+          <button class="ab s2" onclick="doAct('home','syvforaarsaket')">7m forårsaket</button>
+        </div></div>
+      </div>
+    </div>
+    <div class="ts">
+      <div class="th away"><span id="aLabel">Bortelag</span><span class="tsb" style="color:var(--blue)" id="sA">0</span></div>
+      <div class="pg" id="awayPG"></div>
+      <div class="ap">
+        <div class="warn" id="warnAway">Velg spiller først!</div>
+        <div class="ag"><div class="agt">Scoring</div><div class="abs">
+          <button class="ab m" onclick="doAct('away','maal')">⚽ Mål</button>
+          <button class="ab b" onclick="doAct('away','bom')">✖ Bom</button>
+        </div></div>
+        <div class="ag"><div class="agt">Skuddzone</div><div class="abs">
+          <button class="ab z" onclick="openZone('away')">🎯 Skuddzone</button>
+        </div></div>
+        <div class="ag"><div class="agt">Annet</div><div class="abs">
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div id="page-log" class="page">
+  <div class="stitle">Hendelseslogg</div>
+  <div class="lc">
+    <button class="lf on" onclick="setFilter('all',this)">Alle</button>
+    <button class="lf" onclick="setFilter('maal',this)">Mål</button>
+    <button class="lf" onclick="setFilter('bom',this)">Bom</button>
+    <button class="lf" onclick="setFilter('zone',this)">Skuddzone</button>
+    <button class="lf" onclick="setFilter('tekfeil',this)">Tekn.feil</button>
+    <button class="lf" onclick="setFilter('redning',this)">Redning</button>
+    <button class="lf" onclick="setFilter('p1',this)">1.omg</button>
+    <button class="lf" onclick="setFilter('p2',this)">2.omg</button>
+  </div>
+  <div id="logList"></div>
+</div>
+
+<!-- STATS (current match) -->
+<div id="page-stats" class="page">
+  <div class="ss2"><div class="stitle">Oversikt</div><div class="smg" id="smg"></div></div>
+  <div class="ss2">
+    <div class="stitle">Spillerstatistikk — <span id="stHL"></span></div>
+    <div style="overflow-x:auto"><table class="st"><thead><tr>
+      <th>#</th><th>Navn</th><th>Mål</th><th>Bom</th><th>Assist</th>
+      <th>Dårlig pass</th><th>Angrepsf.</th><th>Dårlig mot.</th>
+      <th>Redninger</th><th>7m tild.</th><th>7m forår.</th>
+    </tr></thead><tbody id="hStatBody"></tbody></table></div>
+  </div>
+  <div class="ss2">
+    <div class="stitle">Keeperstatistikk — <span id="stHL3"></span></div>
+    <div style="overflow-x:auto"><table class="st"><thead><tr>
+      <th>#</th><th>Keeper</th><th>Skudd mot</th><th>Redninger</th><th>Bom</th><th>Innlagt</th><th>Red.%</th>
+      <th>9m</th><th>6m</th><th>Kant</th><th>Kontra</th><th>7m</th>
+    </tr></thead><tbody id="kStatBody"></tbody></table></div>
+  </div>
+  <div class="ss2">
+    <div class="stitle">Skuddstatistikk — <span id="stAL"></span> (bortelag)</div>
+    <div style="overflow-x:auto"><table class="st"><thead><tr>
+      <th>Sone</th><th>Mål</th><th>Bom</th><th>Redning</th><th>Totalt</th><th>%</th>
+    </tr></thead><tbody id="aZoneBody"></tbody></table></div>
+  </div>
+  <div class="ss2">
+    <div class="stitle">Skuddstatistikk — <span id="stHL2"></span></div>
+    <div style="overflow-x:auto"><table class="st"><thead><tr>
+      <th>Sone</th><th>Mål</th><th>Ikke mål</th><th>Totalt</th><th>%</th>
+    </tr></thead><tbody id="hZoneBody"></tbody></table></div>
+  </div>
+  <div class="eb">
+    <button class="btn blu" onclick="exportCSV(null)">⬇ Eksporter CSV</button>
+    <button class="btn dng" onclick="resetMatch()">↺ Nullstill kamp</button>
+  </div>
+</div>
+
+<!-- TOTAL STATS -->
+<div id="page-total" class="page">
+  <div class="stitle">Total statistikk — alle lagrede kamper</div>
+  <div id="totalContent"><p style="color:var(--muted);font-size:.88rem;padding:10px 0;">Ingen lagrede kamper ennå.</p></div>
+</div>
+
+<!-- ARKIV -->
+<div id="page-arkiv" class="page">
+  <div class="stitle">Lagrede kamper</div>
+  <div id="arkivList"><p style="color:var(--muted);font-size:.88rem;padding:10px 0;">Ingen lagrede kamper ennå.</p></div>
+</div>
+
+<!-- ZONE POPUP -->
+<div class="pop" id="zonePop">
+  <div class="pb3">
+    <h3 id="zTitle">Skuddzone</h3>
+    <div class="kw" id="keeperWrap">
+      <div class="kl2">🧤 Keeper (hjemmelag)</div>
+      <div class="kbs" id="keeperBtns"></div>
+    </div>
+    <div class="zr">
+      <button class="zb" data-z="9m v">9m Venstre</button>
+      <button class="zb" data-z="9m m">9m Midt</button>
+      <button class="zb" data-z="9m h">9m Høyre</button>
+    </div>
+    <div class="zr">
+      <button class="zb" data-z="6m v">6m Venstre</button>
+      <button class="zb" data-z="6m m">6m Midt</button>
+      <button class="zb" data-z="6m h">6m Høyre</button>
+    </div>
+    <div class="zr">
+      <button class="zb" data-z="kant v">Kant Venstre</button>
+      <button class="zb" data-z="kant h">Kant Høyre</button>
+    </div>
+    <div class="zr">
+      <button class="zb" data-z="kontra">Kontra</button>
+      <button class="zb" data-z="7m">7-meter</button>
+    </div>
+    <div class="or" id="outcomeRow">
+      <button class="ob m">⚽ Mål</button>
+      <button class="ob b" id="zoneBom">✖ Bom</button>
+      <button class="ob r" id="zoneRed">🧤 Redning</button>
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <button class="btn sec" onclick="closePop('zonePop')">Avbryt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIST POPUP -->
+<div class="pop" id="assistPop">
+  <div class="pb3">
+    <h3 id="assTitle">Hvem gav assist?</h3>
+    <div class="ag2" id="assGrid"></div>
+    <div style="text-align:center;">
+      <button class="btn sec" id="noAssist">Ingen assist</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEKFEIL POPUP -->
+<div class="pop" id="tfPop">
+  <div class="pb3">
+    <h3 id="tfTitle">Teknisk feil</h3>
+    <div class="tg">
+      <button class="tb" data-tf="Dårlig pasning">🤾 Dårlig pasning</button>
+      <button class="tb" data-tf="Angrepsfeil">🚫 Angrepsfeil</button>
+      <button class="tb" data-tf="Dårlig mottak">✋ Dårlig mottak</button>
+      <button class="tb" data-tf="Annen teknisk feil">⚠ Annen</button>
+    </div>
+    <div style="text-align:center;"><button class="btn sec" onclick="closePop('tfPop')">Avbryt</button></div>
+  </div>
+</div>
+
+<!-- ROSTER POPUP -->
+<div class="pop" id="rosterPop">
+  <div class="pb3">
+    <h3 id="rTitle">Velg kampstall</h3>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:10px;text-align:center;">Trykk for å velge/fjerne</p>
+    <div class="rg" id="rGrid"></div>
+    <div style="text-align:center;"><button class="btn grn" onclick="confirmRoster()">✓ Bekreft</button></div>
+  </div>
+</div>
+
+<!-- SAVE POPUP -->
+<div class="pop" id="savePop">
+  <div class="pb3">
+    <h3>Lagre / last kamp</h3>
+    <div class="ir" style="margin-bottom:10px;">
+      <input type="text" id="saveName" placeholder="Navn på kamp (valgfritt)">
+      <button class="btn grn" onclick="saveGame()">💾 Lagre</button>
+    </div>
+    <div style="font-family:var(--fd);font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Lagrede kamper</div>
+    <div id="saveList"></div>
+    <div style="text-align:center;margin-top:10px;"><button class="btn sec" onclick="closePop('savePop')">Lukk</button></div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="pop" id="confirmPop">
+  <div class="pb3" style="max-width:320px;">
+    <h3 id="confirmMsg" style="font-size:.95rem;margin-bottom:18px;font-weight:700;text-transform:none;letter-spacing:0;"></h3>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn grn" id="confirmYes">✓ Ja</button>
+      <button class="btn sec" id="confirmNo">✕ Nei</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+const ZONES = ['9m v','9m m','9m h','6m v','6m m','6m h','kant v','kant h','kontra','7m'];
+const LS_HOME = 'hbs_home_squads';
+const LS_AWAY = 'hbs_away_squads';
+const LS_GAMES = 'hbs_games';
+
+let S = {
+  homeName:'Hjemmelag', awayName:'Bortelag',
+  homeP:[], awayP:[],
+  hScore:0, aScore:0,
+  selH:null, selA:null,
+  log:[], period:1,
+  status:'idle', // idle|active|halftime|ended
+  ht:{h:0,a:0}
+};
+
+let zCtx={}, tfCtx={}, assCtx={};
+
+const uid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
+const ts  = () => new Date().toLocaleTimeString('no',{hour:'2-digit',minute:'2-digit'});
+
+// ──────────────────────────────────────────────
+// LS HELPERS
+// ──────────────────────────────────────────────
+const lsGet = k => { try{ return JSON.parse(localStorage.getItem(k)||'[]'); }catch{ return []; } };
+const lsSet = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+// ──────────────────────────────────────────────
+// NAVIGATION
+// ──────────────────────────────────────────────
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  const tabs = document.querySelectorAll('.nt');
+  tabs.forEach(t=>{ if(t.textContent.toLowerCase().startsWith(name.slice(0,3))) t.classList.add('on'); });
+  if(name==='log') renderLog();
+  if(name==='stats') renderStats();
+  if(name==='arkiv') renderArkiv();
+  if(name==='total') renderTotal();
+}
+
+// ──────────────────────────────────────────────
+// MATCH BUTTONS
+// Single handler reads S.status at call time — no cloning needed
+// ──────────────────────────────────────────────
+let _matchButtonsBound = false;
+function bindMatchButtons() {
+  if (!_matchButtonsBound) {
+    _matchButtonsBound = true;
+    document.getElementById('bHT').addEventListener('click', function() {
+      if (S.status === 'active' && S.period === 1) doHalftime();
+      else if (S.status === 'active' && S.period === 2) doEnd();
+    });
+    document.getElementById('bP2').addEventListener('click', function() {
+      if (S.status === 'halftime') doSecondHalf();
+    });
+    document.getElementById('bEnd').addEventListener('click', function() {
+      doEnd();
+    });
+  }
+  // Update visibility and labels based on current state
+  const bHT  = document.getElementById('bHT');
+  const bP2  = document.getElementById('bP2');
+  if (S.status === 'active' && S.period === 1) {
+    bHT.textContent='⏸ Halvtid'; bHT.style.display=''; bP2.style.display='none';
+  } else if (S.status === 'halftime') {
+    bHT.style.display='none'; bP2.style.display='';
+  } else if (S.status === 'active' && S.period === 2) {
+    bHT.textContent='🏁 Avslutt kamp'; bHT.style.display=''; bP2.style.display='none';
+  } else if (S.status === 'ended') {
+    bHT.style.display='none'; bP2.style.display='none';
+  } else {
+    // idle
+    bHT.textContent='⏸ Halvtid'; bHT.style.display=''; bP2.style.display='none';
+  }
+}
+
+function setPeriodBadge() {
+  const el = document.getElementById('pBadge');
+  if(S.status==='halftime')    { el.textContent='Halvtid';     el.className='pb ht'; }
+  else if(S.status==='ended')  { el.textContent='Slutt';       el.className='pb'; }
+  else if(S.status==='idle')   { el.textContent='Ikke startet';el.className='pb'; }
+  else { el.textContent=S.period===1?'1. omgang':'2. omgang'; el.className='pb on'; }
+}
+
+function doHalftime() {
+  confirmDlg('Registrer halvtid?', ()=>{
+    S.status='halftime'; S.ht={h:S.hScore,a:S.aScore};
+    bindMatchButtons(); setPeriodBadge();
+    toast('⏸ Halvtid — '+S.hScore+'–'+S.aScore);
+  });
+}
+function doSecondHalf() {
+  S.period=2; S.status='active';
+  bindMatchButtons(); setPeriodBadge();
+  toast('▶ 2. omgang startet');
+}
+function doEnd() {
+  confirmDlg('Avslutt kampen?', ()=>{
+    S.status='ended'; bindMatchButtons(); setPeriodBadge();
+    toast('🏁 Slutt — '+S.hScore+'–'+S.aScore);
+    openPop('savePop'); renderSaveList();
+  });
+}
+
+// ──────────────────────────────────────────────
+// SAVED SQUADS
+// ──────────────────────────────────────────────
+function saveHomeSquad() {
+  const name = document.getElementById('homeTeamName').value.trim();
+  if(!name||!S.homeP.length){ toast('Legg til spillere og lagnavn'); return; }
+  const arr = lsGet(LS_HOME);
+  const idx = arr.findIndex(s=>s.name===name);
+  const e = {name, players: JSON.parse(JSON.stringify(S.homeP))};
+  if(idx>=0){
+    confirmDlg('Oppdatere "'+name+'"?', ()=>{ arr[idx]=e; lsSet(LS_HOME,arr); renderHomeSquadList(); toast('💾 "'+name+'" lagret'); });
+    return;
+  }
+  arr.push(e); lsSet(LS_HOME,arr); renderHomeSquadList(); toast('💾 "'+name+'" lagret');
+}
+function loadHomeSquad(name) {
+  const s=lsGet(LS_HOME).find(s=>s.name===name); if(!s) return;
+  document.getElementById('homeTeamName').value=s.name;
+  S.homeP=s.players.map(p=>({...p,id:uid()}));
+  renderPlayerList('home'); renderHomeSquadList(); toast('📂 "'+name+'" lastet');
+}
+function deleteHomeSquad(name) {
+  confirmDlg('Slett "'+name+'"?', ()=>{
+    lsSet(LS_HOME, lsGet(LS_HOME).filter(s=>s.name!==name)); renderHomeSquadList();
+  });
+}
+function renderHomeSquadList() {
+  const arr=lsGet(LS_HOME);
+  const el=document.getElementById('homeSquadList');
+  if(!arr.length){ el.innerHTML=''; return; }
+  el.innerHTML='<div style="font-size:.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Lagrede tropper</div>'
+    +arr.map(s=>`<div class="saved-item">
+      <span><strong>${s.name}</strong> <span style="color:var(--muted);font-size:.76rem;">(${s.players.length} sp.)</span></span>
+      <div style="display:flex;gap:4px;">
+        <button class="btn sec" style="padding:4px 8px;font-size:.72rem;" onclick="loadHomeSquad('${esc(s.name)}')">Last inn</button>
+        <button class="btn dng" style="padding:4px 7px;font-size:.72rem;" onclick="deleteHomeSquad('${esc(s.name)}')">🗑</button>
+      </div></div>`).join('');
+}
+
+function saveAwaySquad() {
+  const name=document.getElementById('awayTeamName').value.trim();
+  if(!name||!S.awayP.length){ toast('Legg til spillere og lagnavn'); return; }
+  const arr=lsGet(LS_AWAY);
+  const idx=arr.findIndex(s=>s.name===name);
+  const e={name, players:JSON.parse(JSON.stringify(S.awayP))};
+  if(idx>=0){
+    confirmDlg('Oppdatere "'+name+'"?', ()=>{ arr[idx]=e; lsSet(LS_AWAY,arr); renderAwaySquadList(); toast('💾 "'+name+'" lagret'); });
+    return;
+  }
+  arr.push(e); lsSet(LS_AWAY,arr); renderAwaySquadList(); toast('💾 "'+name+'" lagret');
+}
+function loadAwaySquad(name) {
+  const s=lsGet(LS_AWAY).find(s=>s.name===name); if(!s) return;
+  document.getElementById('awayTeamName').value=s.name;
+  S.awayP=s.players.map(p=>({...p,id:uid()}));
+  renderPlayerList('away'); renderAwaySquadList(); toast('📂 "'+name+'" lastet');
+}
+function deleteAwaySquad(name) {
+  confirmDlg('Slett "'+name+'"?', ()=>{
+    lsSet(LS_AWAY, lsGet(LS_AWAY).filter(s=>s.name!==name)); renderAwaySquadList();
+  });
+}
+function renderAwaySquadList() {
+  const arr=lsGet(LS_AWAY);
+  const el=document.getElementById('awaySquadList');
+  if(!arr.length){ el.innerHTML=''; return; }
+  el.innerHTML='<div style="font-size:.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Lagrede bortelag</div>'
+    +arr.map(s=>`<div class="saved-item">
+      <span><strong>${s.name}</strong> <span style="color:var(--muted);font-size:.76rem;">(${s.players.length} sp.)</span></span>
+      <div style="display:flex;gap:4px;">
+        <button class="btn sec" style="padding:4px 8px;font-size:.72rem;" onclick="loadAwaySquad('${esc(s.name)}')">Last inn</button>
+        <button class="btn dng" style="padding:4px 7px;font-size:.72rem;" onclick="deleteAwaySquad('${esc(s.name)}')">🗑</button>
+      </div></div>`).join('');
+}
+
+// ──────────────────────────────────────────────
+// PLAYER SETUP
+// ──────────────────────────────────────────────
+function addPlayer(t) {
+  const numEl=document.getElementById(t==='home'?'homeNum':'awayNum');
+  const nameEl=document.getElementById(t==='home'?'homeName':'awayName');
+  const nm=numEl.value.trim(), n=nameEl.value.trim(); if(!n) return;
+  (t==='home'?S.homeP:S.awayP).push({id:uid(),num:nm||'?',name:n,isGK:false,inSquad:true});
+  numEl.value=''; nameEl.value=''; renderPlayerList(t);
+}
+function removePlayer(t,id) {
+  if(t==='home') S.homeP=S.homeP.filter(p=>p.id!==id);
+  else S.awayP=S.awayP.filter(p=>p.id!==id);
+  renderPlayerList(t);
+}
+function toggleGK(id) {
+  const p=S.homeP.find(p=>p.id===id); if(p){ p.isGK=!p.isGK; renderPlayerList('home'); }
+}
+function renderPlayerList(t) {
+  const el=document.getElementById(t==='home'?'homePL':'awayPL');
+  const arr=t==='home'?S.homeP:S.awayP;
+  el.innerHTML=arr.map(p=>`<li>
+    <span><span class="pb2">${p.num}</span>${p.name}${p.isGK?' 🧤':''}</span>
+    <div style="display:flex;gap:4px;align-items:center;">
+      ${t==='home'?`<button class="gkb${p.isGK?' on':''}" onclick="toggleGK('${p.id}')">${p.isGK?'🧤 MV':'MV?'}</button>`:''}
+      <button class="rb" onclick="removePlayer('${t}','${p.id}')">✕</button>
+    </div></li>`).join('');
+}
+document.getElementById('homeName').addEventListener('keydown',e=>{ if(e.key==='Enter') addPlayer('home'); });
+document.getElementById('awayName').addEventListener('keydown',e=>{ if(e.key==='Enter') addPlayer('away'); });
+
+// ──────────────────────────────────────────────
+// MATCH START
+// ──────────────────────────────────────────────
+function startMatch() {
+  S.homeName=document.getElementById('homeTeamName').value||'Hjemmelag';
+  S.awayName=document.getElementById('awayTeamName').value||'Bortelag';
+  S.homeP.forEach(p=>{ if(p.inSquad===undefined) p.inSquad=true; });
+  S.period=1; S.status='active'; S.hScore=0; S.aScore=0;
+  S.selH=null; S.selA=null; S.log=[]; S.ht={h:0,a:0};
+  updateScoreDisplay(); bindMatchButtons(); setPeriodBadge();
+  renderPG('home'); renderPG('away'); updateLabels();
+  goPage('kamp'); toast('▶ Kamp startet!');
+}
+
+function updateLabels() {
+  ['hLabel','stHL','stHL2','stHL3'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=S.homeName;});
+  ['aLabel','stAL'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=S.awayName;});
+}
+
+// ──────────────────────────────────────────────
+// PLAYER GRIDS (in-match)
+// ──────────────────────────────────────────────
+function squadP() { return S.homeP.filter(p=>p.inSquad!==false); }
+
+function renderPG(t) {
+  const el=document.getElementById(t==='home'?'homePG':'awayPG');
+  const arr=t==='home'?squadP():S.awayP;
+  const sel=t==='home'?S.selH:S.selA;
+  let html=arr.map(p=>`<button class="pbtn${p.id===sel?' on '+t:''}" data-id="${p.id}" data-team="${t}">
+    <span class="pn">${p.num}</span>${p.name}${p.isGK?' 🧤':''}
+  </button>`).join('');
+  if(t==='home') html+=`<button class="pbtn" style="border-style:dashed;color:var(--muted);" onclick="openRoster()">✏ Kampstall</button>`;
+  if(!arr.length) html='<span style="color:var(--muted);font-size:.78rem;padding:3px;">Ingen spillere</span>';
+  el.innerHTML=html;
+  el.querySelectorAll('.pbtn[data-id]').forEach(b=>b.addEventListener('click',()=>selPlayer(t,b.dataset.id)));
+}
+
+function selPlayer(t,id) {
+  if(t==='home') S.selH = S.selH===id?null:id;
+  else S.selA = S.selA===id?null:id;
+  renderPG(t);
+  document.getElementById(t==='home'?'warnHome':'warnAway').classList.remove('on');
+}
+
+function getSel(t) {
+  const id=t==='home'?S.selH:S.selA; if(!id) return null;
+  return (t==='home'?S.homeP:S.awayP).find(p=>p.id===id)||null;
+}
+
+// ──────────────────────────────────────────────
+// ROSTER POPUP
+// ──────────────────────────────────────────────
+function openRoster() {
+  document.getElementById('rTitle').textContent='Velg kampstall — '+S.homeName;
+  document.getElementById('rGrid').innerHTML=S.homeP.map((p,i)=>
+    `<button class="rbt${p.inSquad!==false?' on':''}" data-idx="${i}">
+      <span class="rn">${p.num}</span>${p.name}${p.isGK?' 🧤':''}
+    </button>`).join('');
+  document.querySelectorAll('.rbt').forEach(b=>b.addEventListener('click',()=>{
+    const i=parseInt(b.dataset.idx);
+    S.homeP[i].inSquad=S.homeP[i].inSquad===false?true:false;
+    b.classList.toggle('on',S.homeP[i].inSquad!==false);
+  }));
+  openPop('rosterPop');
+}
+function confirmRoster() { closePop('rosterPop'); renderPG('home'); toast('✓ Kampstall oppdatert'); }
+
+// ──────────────────────────────────────────────
+// ACTIONS
+// ──────────────────────────────────────────────
+function doAct(t,type,sub) {
+  const p=getSel(t);
+  if(!p){ document.getElementById(t==='home'?'warnHome':'warnAway').classList.add('on'); return; }
+  document.getElementById(t==='home'?'warnHome':'warnAway').classList.remove('on');
+  commit({t,type,sub:sub||null,p});
+}
+
+function doHomeMaal() {
+  const p=getSel('home');
+  if(!p){ document.getElementById('warnHome').classList.add('on'); return; }
+  document.getElementById('warnHome').classList.remove('on');
+  openAssist(p, null);
+}
+
+function commit({t,type,sub,p,zone,outcome,kId,kName}) {
+  const e={
+    id:uid(), t, type, sub:sub||null,
+    pName:p.name, pNum:p.num, pId:p.id,
+    time:ts(), period:S.period,
+    zone:zone||null, outcome:outcome||null,
+    kId:kId||null, kName:kName||null
+  };
+  if(type==='maal'){ if(t==='home') S.hScore++; else S.aScore++; updateScoreDisplay(); }
+  S.log.unshift(e);
+  const ol=outcome==='maal'?'⚽ Mål':outcome==='redning'?'🧤 Redning':outcome==='bom'?'✖ Bom':'';
+  const lbl=type==='tekfeil'&&sub?'⚠ '+sub:type==='zone'?'🎯 '+zone+(ol?' → '+ol:''):(TLBL[type]||type);
+  toast(lbl+' — '+p.name);
+  renderStats();
+}
+
+const TLBL={maal:'⚽ Mål',bom:'✖ Bom',assist:'🤝 Assist',tekfeil:'⚠ Tekn.feil',
+  redning:'🧤 Redning',zone:'🎯 Zone',syvtildelt:'7m tildelt',syvforaarsaket:'7m forårsaket'};
+
+function updateScoreDisplay() {
+  document.getElementById('sH').textContent=S.hScore;
+  document.getElementById('sA').textContent=S.aScore;
+  document.getElementById('hH').textContent=S.hScore;
+  document.getElementById('hA').textContent=S.aScore;
+}
+
+// ──────────────────────────────────────────────
+// ASSIST POPUP
+// ──────────────────────────────────────────────
+function openAssist(scorer, heldZoneEntry) {
+  assCtx={scorer, heldZoneEntry, others:squadP().filter(p=>p.id!==scorer.id)};
+  document.getElementById('assTitle').textContent='⚽ Mål — '+scorer.name+' — Assist?';
+  const g=document.getElementById('assGrid');
+  g.innerHTML=assCtx.others.length
+    ? assCtx.others.map((p,i)=>`<button class="apb" data-i="${i}"><span class="an">${p.num}</span>${p.name}</button>`).join('')
+    : '<span style="color:var(--muted);font-size:.84rem;">Ingen andre spillere</span>';
+  g.querySelectorAll('.apb').forEach(b=>b.addEventListener('click',()=>confirmAssist(parseInt(b.dataset.i))));
+  document.getElementById('noAssist').onclick=()=>confirmAssist(-1);
+  openPop('assistPop');
+}
+
+function confirmAssist(idx) {
+  closePop('assistPop');
+  const {scorer, heldZoneEntry, others}=assCtx;
+  if(!scorer) return;
+
+  if(heldZoneEntry) {
+    // Commit the zone entry (home maal from zone)
+    S.hScore++; updateScoreDisplay(); S.log.unshift(heldZoneEntry);
+  } else {
+    commit({t:'home',type:'maal',p:scorer});
+  }
+
+  if(idx>=0 && others[idx]) {
+    const ap=others[idx];
+    S.log.unshift({id:uid(),t:'home',type:'assist',sub:null,
+      pName:ap.name,pNum:ap.num,pId:ap.id,
+      time:ts(),period:S.period,zone:null,outcome:null,kId:null,kName:null,assFor:scorer.name});
+    toast('🤝 Assist — '+ap.name);
+    renderStats();
+  }
+}
+
+// ──────────────────────────────────────────────
+// TEKFEIL POPUP
+// ──────────────────────────────────────────────
+function openTF(t) {
+  const p=getSel(t);
+  if(!p){ document.getElementById(t==='home'?'warnHome':'warnAway').classList.add('on'); return; }
+  document.getElementById(t==='home'?'warnHome':'warnAway').classList.remove('on');
+  tfCtx={t,p};
+  document.getElementById('tfTitle').textContent='Teknisk feil — '+p.name;
+  document.querySelectorAll('.tb').forEach(b=>b.onclick=()=>{
+    S.log.unshift({id:uid(),t,type:'tekfeil',sub:b.dataset.tf,
+      pName:p.name,pNum:p.num,pId:p.id,time:ts(),period:S.period,
+      zone:null,outcome:null,kId:null,kName:null});
+    closePop('tfPop'); toast('⚠ '+b.dataset.tf+' — '+p.name); renderStats();
+  });
+  openPop('tfPop');
+}
+
+// ──────────────────────────────────────────────
+// ZONE POPUP
+// ──────────────────────────────────────────────
+function openZone(t) {
+  const p=getSel(t);
+  if(!p){ document.getElementById(t==='home'?'warnHome':'warnAway').classList.add('on'); return; }
+  document.getElementById(t==='home'?'warnHome':'warnAway').classList.remove('on');
+  zCtx={t,p,zone:null,kIdx:null,kPool:[]};
+  document.getElementById('zTitle').textContent='Skuddzone — '+p.name;
+  document.getElementById('outcomeRow').classList.remove('on');
+  document.querySelectorAll('.zb').forEach(b=>b.classList.remove('on'));
+
+  const kw=document.getElementById('keeperWrap');
+  const bBom=document.getElementById('zoneBom');
+  const bRed=document.getElementById('zoneRed');
+
+  if(t==='away') {
+    kw.style.display='';
+    bBom.textContent='✖ Bom (skytter)'; bRed.style.display='';
+    const gks=S.homeP.filter(p=>p.isGK);
+    const pool=gks.length?gks:S.homeP;
+    zCtx.kPool=pool;
+    document.getElementById('keeperBtns').innerHTML=pool.length
+      ? pool.map((k,i)=>`<button class="kb" data-ki="${i}">${k.num} ${k.name}${k.isGK?' 🧤':''}</button>`).join('')
+      : '<span style="color:var(--muted);font-size:.8rem;">Ingen keepere</span>';
+    document.querySelectorAll('.kb').forEach(b=>b.addEventListener('click',()=>{
+      zCtx.kIdx=parseInt(b.dataset.ki);
+      document.querySelectorAll('.kb').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+    }));
+  } else {
+    kw.style.display='none';
+    bBom.textContent='✖ Bom'; bRed.style.display='none';
+  }
+
+  document.querySelectorAll('.zb').forEach(b=>b.onclick=()=>{
+    zCtx.zone=b.dataset.z;
+    document.querySelectorAll('.zb').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.getElementById('outcomeRow').classList.add('on');
+  });
+
+  document.querySelector('.ob.m').onclick=()=>confirmZone('maal');
+  document.getElementById('zoneBom').onclick=()=>confirmZone('bom');
+  document.getElementById('zoneRed').onclick=()=>confirmZone('redning');
+
+  openPop('zonePop');
+}
+
+function confirmZone(outcome) {
+  const {t,p,zone,kPool,kIdx}=zCtx;
+  if(!zone) return;
+  const keeper=kIdx!==null&&kIdx!==undefined?kPool[kIdx]:null;
+  const e={
+    id:uid(),t,type:'zone',sub:null,
+    pName:p.name,pNum:p.num,pId:p.id,
+    time:ts(),period:S.period,
+    zone,outcome,
+    kId:keeper?keeper.id:null, kName:keeper?keeper.name:null
+  };
+  if(t==='home' && outcome==='maal') {
+    closePop('zonePop'); openAssist(p, e); return;
+  }
+  if(outcome==='maal'){ if(t==='home') S.hScore++; else S.aScore++; updateScoreDisplay(); }
+  S.log.unshift(e); closePop('zonePop');
+  const ol=outcome==='maal'?'⚽ Mål':outcome==='redning'?'🧤 Redning':'✖ Bom';
+  toast('🎯 '+zone+' → '+ol+' — '+p.name+(keeper?' ('+keeper.name+')':''));
+  renderStats();
+}
+
+// ──────────────────────────────────────────────
+// POPUP HELPERS
+// ──────────────────────────────────────────────
+function openPop(id){ document.getElementById(id).classList.add('on'); }
+function closePop(id){ document.getElementById(id).classList.remove('on'); }
+
+// ──────────────────────────────────────────────
+// LOG
+// ──────────────────────────────────────────────
+let logFilter='all';
+function setFilter(f,btn) {
+  logFilter=f;
+  document.querySelectorAll('.lf').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); renderLog();
+}
+function renderLog() {
+  const el=document.getElementById('logList');
+  let arr=S.log;
+  if(logFilter==='p1') arr=arr.filter(e=>e.period===1);
+  else if(logFilter==='p2') arr=arr.filter(e=>e.period===2);
+  else if(logFilter!=='all') arr=arr.filter(e=>e.type===logFilter);
+  if(!arr.length){ el.innerHTML='<p style="color:var(--muted);font-size:.86rem;padding:10px 0;">Ingen hendelser.</p>'; return; }
+  el.innerHTML=arr.map(e=>{
+    const tc=e.t==='home'?'var(--a2)':'var(--blue)';
+    const tn=e.t==='home'?S.homeName:S.awayName;
+    let det;
+    if(e.type==='zone'){ const ol=e.outcome==='maal'?'⚽ Mål':e.outcome==='redning'?'🧤 Redning':'✖ Bom'; det=e.zone+' → '+ol; }
+    else if(e.type==='tekfeil'&&e.sub) det='⚠ '+e.sub;
+    else det=TLBL[e.type]||e.type;
+    const ks=e.type==='zone'&&e.t==='away'&&e.kName?` <span style="color:var(--a2);font-size:.72rem;">🧤 ${e.kName}</span>`:'';
+    const as=e.type==='assist'&&e.assFor?` <span style="color:var(--muted);font-size:.72rem;">til ${e.assFor}</span>`:'';
+    return `<div class="le">
+      <div class="el">
+        <span class="lt">${e.time}</span>
+        <span class="lp">${e.period}.omg</span>
+        <span class="tag ${e.type}">${det}</span>
+        <span><strong>#${e.pNum} ${e.pName}</strong> <span style="color:${tc};font-size:.73rem;">— ${tn}</span>${ks}${as}</span>
+      </div>
+      <button class="ub" data-uid="${e.id}">Angre</button>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.ub').forEach(b=>b.addEventListener('click',()=>undoEntry(b.dataset.uid)));
+}
+
+function undoEntry(id) {
+  const e=S.log.find(e=>e.id===id); if(!e) return;
+  if(e.type==='maal'||(e.type==='zone'&&e.outcome==='maal')){
+    if(e.t==='home'&&S.hScore>0) S.hScore--;
+    if(e.t==='away'&&S.aScore>0) S.aScore--;
+    updateScoreDisplay();
+  }
+  S.log=S.log.filter(e=>e.id!==id);
+  renderLog(); renderStats(); toast('↩ Angret');
+}
+
+// ──────────────────────────────────────────────
+// STATS (current match)
+// ──────────────────────────────────────────────
+function renderStats() {
+  if(!document.getElementById('page-stats').classList.contains('on')) return;
+  updateLabels();
+  const hm=S.log.filter(e=>e.t==='home'&&(e.type==='maal'||(e.type==='zone'&&e.outcome==='maal'))).length;
+  const am=S.log.filter(e=>e.t==='away'&&(e.type==='maal'||(e.type==='zone'&&e.outcome==='maal'))).length;
+  const hb=S.log.filter(e=>e.t==='home'&&(e.type==='bom'||(e.type==='zone'&&e.outcome!=='maal'))).length;
+  const ab=S.log.filter(e=>e.t==='away'&&(e.type==='bom'||(e.type==='zone'&&e.outcome!=='maal'))).length;
+  document.getElementById('smg').innerHTML=`
+    <div class="smc"><div class="sl">${S.homeName}</div><div class="sv" style="color:var(--a2)">${S.hScore}</div></div>
+    <div class="smc"><div class="sl">${S.awayName}</div><div class="sv" style="color:var(--blue)">${S.aScore}</div></div>
+    <div class="smc"><div class="sl">Halvtid</div><div class="sv" style="font-size:1.1rem;padding-top:4px;color:var(--muted)">${S.ht.h||'–'}–${S.ht.a||'–'}</div></div>
+    <div class="smc"><div class="sl">Mål hjem</div><div class="sv" style="color:var(--green)">${hm}</div></div>
+    <div class="smc"><div class="sl">Bom hjem</div><div class="sv" style="color:var(--red)">${hb}</div></div>
+    <div class="smc"><div class="sl">Mål borte</div><div class="sv" style="color:var(--green)">${am}</div></div>
+    <div class="smc"><div class="sl">Bom borte</div><div class="sv" style="color:var(--red)">${ab}</div></div>`;
+
+  // Player table
+  document.getElementById('hStatBody').innerHTML=S.homeP.map(p=>{
+    const pl=S.log.filter(e=>e.t==='home'&&e.pId===p.id);
+    const m=pl.filter(e=>e.type==='maal'||(e.type==='zone'&&e.outcome==='maal')).length;
+    const b=pl.filter(e=>e.type==='bom'||(e.type==='zone'&&e.outcome!=='maal'&&e.type==='zone')).length;
+    const tf=s=>pl.filter(e=>e.type==='tekfeil'&&e.sub===s).length;
+    return `<tr>
+      <td class="nc">${p.num}</td><td>${p.name}${p.isGK?' 🧤':''}</td>
+      <td class="nc" style="color:var(--green)">${m}</td>
+      <td class="nc" style="color:var(--red)">${b}</td>
+      <td class="nc" style="color:var(--purple)">${pl.filter(e=>e.type==='assist').length}</td>
+      <td class="nc" style="color:var(--yellow)">${tf('Dårlig pasning')}</td>
+      <td class="nc" style="color:var(--yellow)">${tf('Angrepsfeil')}</td>
+      <td class="nc" style="color:var(--yellow)">${tf('Dårlig mottak')}</td>
+      <td class="nc" style="color:var(--blue)">${pl.filter(e=>e.type==='redning').length}</td>
+      <td class="nc">${pl.filter(e=>e.type==='syvtildelt').length}</td>
+      <td class="nc">${pl.filter(e=>e.type==='syvforaarsaket').length}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="11" style="color:var(--muted);text-align:center;padding:10px">Ingen spillere</td></tr>';
+
+  // Keeper table
+  const azs=S.log.filter(e=>e.t==='away'&&e.type==='zone');
+  const gks=S.homeP.filter(p=>p.isGK);
+  document.getElementById('kStatBody').innerHTML=gks.length?gks.map(p=>{
+    const sh=azs.filter(e=>e.kId===p.id);
+    const inn=sh.filter(e=>e.outcome==='maal').length;
+    const red=sh.filter(e=>e.outcome==='redning').length;
+    const bom=sh.filter(e=>e.outcome==='bom').length;
+    const tot=sh.length; const base=red+inn;
+    return `<tr>
+      <td class="nc">${p.num}</td><td>${p.name} 🧤</td>
+      <td class="nc">${tot}</td>
+      <td class="nc" style="color:var(--green)">${red}</td>
+      <td class="nc" style="color:var(--yellow)">${bom}</td>
+      <td class="nc" style="color:var(--red)">${inn}</td>
+      <td class="nc" style="color:var(--blue)">${base>0?Math.round(red/base*100)+'%':'—'}</td>
+      <td class="nc">${sh.filter(e=>e.zone&&e.zone.startsWith('9m')).length}</td>
+      <td class="nc">${sh.filter(e=>e.zone&&e.zone.startsWith('6m')).length}</td>
+      <td class="nc">${sh.filter(e=>e.zone&&e.zone.startsWith('kant')).length}</td>
+      <td class="nc">${sh.filter(e=>e.zone==='kontra').length}</td>
+      <td class="nc">${sh.filter(e=>e.zone==='7m').length}</td>
+    </tr>`;
+  }).join('')
+  :'<tr><td colspan="12" style="color:var(--muted);text-align:center;padding:10px">Ingen spillere merket som 🧤 MV i oppsett</td></tr>';
+
+  // Away zone
+  document.getElementById('aZoneBody').innerHTML=ZONES.map(z=>{
+    const zl=azs.filter(e=>e.zone===z);
+    const m=zl.filter(e=>e.outcome==='maal').length;
+    const b=zl.filter(e=>e.outcome==='bom').length;
+    const r=zl.filter(e=>e.outcome==='redning').length;
+    const t=m+b+r;
+    return `<tr><td>${z}</td>
+      <td class="nc" style="color:var(--green)">${m}</td>
+      <td class="nc" style="color:var(--yellow)">${b}</td>
+      <td class="nc" style="color:var(--blue)">${r}</td>
+      <td class="nc">${t}</td>
+      <td class="nc">${t>0?Math.round(m/t*100)+'%':'—'}</td></tr>`;
+  }).join('');
+
+  // Home zone
+  const hzs=S.log.filter(e=>e.t==='home'&&e.type==='zone');
+  document.getElementById('hZoneBody').innerHTML=ZONES.map(z=>{
+    const zl=hzs.filter(e=>e.zone===z);
+    const m=zl.filter(e=>e.outcome==='maal').length;
+    const nm=zl.filter(e=>e.outcome!=='maal').length;
+    const t=m+nm;
+    return `<tr><td>${z}</td>
+      <td class="nc" style="color:var(--green)">${m}</td>
+      <td class="nc" style="color:var(--red)">${nm}</td>
+      <td class="nc">${t}</td>
+      <td class="nc">${t>0?Math.round(m/t*100)+'%':'—'}</td></tr>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────────
+// SAVE / LOAD GAMES
+// ──────────────────────────────────────────────
+function saveGame() {
+  const name=document.getElementById('saveName').value.trim()||
+    S.homeName+' vs '+S.awayName+' '+new Date().toLocaleDateString('no');
+  const snap={
+    id:uid(), name, savedAt:new Date().toLocaleString('no'),
+    homeName:S.homeName, awayName:S.awayName,
+    hScore:S.hScore, aScore:S.aScore,
+    ht:{...S.ht}, period:S.period, status:S.status,
+    homeP:JSON.parse(JSON.stringify(S.homeP)),
+    awayP:JSON.parse(JSON.stringify(S.awayP)),
+    log:JSON.parse(JSON.stringify(S.log))
+  };
+  const games=lsGet(LS_GAMES);
+  games.unshift(snap);
+  lsSet(LS_GAMES,games);
+  renderSaveList(); renderArkiv();
+  toast('💾 Lagret: '+name);
+}
+
+function loadGame(id) {
+  const games=lsGet(LS_GAMES);
+  const g=games.find(g=>g.id===id);
+  if(!g){ toast('Fant ikke kampen'); return; }
+  confirmDlg('Last inn "'+g.name+'"?', ()=>{
+    S.homeName=g.homeName; S.awayName=g.awayName;
+    S.hScore=g.hScore; S.aScore=g.aScore;
+    S.ht={...g.ht}; S.period=g.period; S.status=g.status;
+    S.homeP=JSON.parse(JSON.stringify(g.homeP));
+    S.awayP=JSON.parse(JSON.stringify(g.awayP));
+    S.log=JSON.parse(JSON.stringify(g.log));
+    S.selH=null; S.selA=null;
+    updateScoreDisplay(); updateLabels();
+    renderPG('home'); renderPG('away');
+    bindMatchButtons(); setPeriodBadge();
+    closePop('savePop'); goPage('kamp');
+    toast('📂 Lastet: '+g.name);
+  });
+}
+
+function deleteGame(id) {
+  const games=lsGet(LS_GAMES);
+  const g=games.find(g=>g.id===id);
+  if(!g) return;
+  confirmDlg('Slett "'+g.name+'"?', ()=>{
+    lsSet(LS_GAMES, lsGet(LS_GAMES).filter(x=>x.id!==id));
+    renderSaveList(); renderArkiv();
+  });
+}
+
+function renderSaveList() {
+  const games=lsGet(LS_GAMES);
+  const el=document.getElementById('saveList');
+  if(!games.length){ el.innerHTML='<p style="color:var(--muted);font-size:.84rem;">Ingen lagrede kamper.</p>'; return; }
+  el.innerHTML=games.map(g=>`<div class="saved-item">
+    <div style="flex:1;min-width:0;">
+      <strong style="font-family:var(--fd)">${g.name}</strong><br>
+      <span style="color:var(--muted);font-size:.75rem;">${g.homeName} ${g.hScore}–${g.aScore} ${g.awayName} · ${g.savedAt}</span>
+    </div>
+    <div style="display:flex;gap:5px;">
+      <button class="btn blu" style="padding:4px 9px;font-size:.72rem;" data-lid="${g.id}">Last inn</button>
+      <button class="btn dng" style="padding:4px 8px;font-size:.72rem;" data-did="${g.id}">✕</button>
+    </div></div>`).join('');
+  el.querySelectorAll('[data-lid]').forEach(b=>b.addEventListener('click',()=>loadGame(b.dataset.lid)));
+  el.querySelectorAll('[data-did]').forEach(b=>b.addEventListener('click',()=>deleteGame(b.dataset.did)));
+}
+
+function renderArkiv() {
+  const games=lsGet(LS_GAMES);
+  const el=document.getElementById('arkivList');
+  if(!games.length){ el.innerHTML='<p style="color:var(--muted);font-size:.88rem;padding:10px 0;">Ingen lagrede kamper.</p>'; return; }
+  el.innerHTML=games.map(g=>`<div class="saved-item" style="flex-wrap:wrap;gap:8px;">
+    <div style="flex:1;min-width:0;">
+      <strong style="font-family:var(--fd)">${g.name}</strong><br>
+      <span style="color:var(--muted);font-size:.75rem;">${g.homeName} <b>${g.hScore}–${g.aScore}</b> ${g.awayName} · HT: ${g.ht?.h||'–'}–${g.ht?.a||'–'} · ${g.savedAt}</span>
+    </div>
+    <div style="display:flex;gap:5px;">
+      <button class="btn blu" style="padding:5px 10px;font-size:.75rem;" data-lid="${g.id}">Last inn</button>
+      <button class="btn sec" style="padding:5px 10px;font-size:.75rem;" data-eid="${g.id}">CSV</button>
+      <button class="btn dng" style="padding:5px 9px;font-size:.75rem;" data-did="${g.id}">✕</button>
+    </div></div>`).join('');
+  el.querySelectorAll('[data-lid]').forEach(b=>b.addEventListener('click',()=>loadGame(b.dataset.lid)));
+  el.querySelectorAll('[data-eid]').forEach(b=>b.addEventListener('click',()=>exportCSV(b.dataset.eid)));
+  el.querySelectorAll('[data-did]').forEach(b=>b.addEventListener('click',()=>deleteGame(b.dataset.did)));
+}
+
+// ──────────────────────────────────────────────
+// TOTAL STATS
+// ──────────────────────────────────────────────
+function renderTotal() {
+  const games=lsGet(LS_GAMES);
+  const el=document.getElementById('totalContent');
+  if(!games.length){ el.innerHTML='<p style="color:var(--muted);font-size:.88rem;padding:10px 0;">Ingen lagrede kamper ennå.</p>'; return; }
+
+  const allLogs=games.flatMap(g=>g.log.map(e=>({...e,gameName:g.name,homeName:g.homeName,awayName:g.awayName})));
+  const homePlayerNames=[...new Set(games.flatMap(g=>g.homeP.map(p=>p.name)))];
+  const awayTeamNames=[...new Set(games.map(g=>g.awayName))];
+
+  let html='';
+
+  // ── Summary ──
+  const totalHGoals=allLogs.filter(e=>e.t==='home'&&(e.type==='maal'||(e.type==='zone'&&e.outcome==='maal'))).length;
+  const totalAGoals=allLogs.filter(e=>e.t==='away'&&(e.type==='maal'||(e.type==='zone'&&e.outcome==='maal'))).length;
+  html+=`<div class="ss2"><div class="stitle">Totaloversikt (${games.length} kamper)</div>
+  <div class="smg">
+    <div class="smc"><div class="sl">Kamper</div><div class="sv" style="color:var(--a2)">${games.length}</div></div>
+    <div class="smc"><div class="sl">Mål scoret</div><div class="sv" style="color:var(--green)">${totalHGoals}</div></div>
+    <div class="smc"><div class="sl">Mål imot</div><div class="sv" style="color:var(--red)">${totalAGoals}</div></div>
+    <div class="smc"><div class="sl">Snitt mål</div><div class="sv" style="color:var(--green)">${(totalHGoals/games.length).toFixed(1)}</div></div>
+    <div class="smc"><div class="sl">Snitt imot</div><div class="sv" style="color:var(--red)">${(totalAGoals/games.length).toFixed(1)}</div></div>
+  </div></div>`;
+
+  // ── Home players ──
+  html+=`<div class="ss2"><div class="stitle">Hjemmelag — per spiller</div>`;
+  homePlayerNames.forEach((name, ni)=>{
+    const pl=allLogs.filter(e=>e.t==='home'&&e.pName===name);
+    const kamps=games.filter(g=>g.homeP.some(p=>p.name===name)).length;
+    const m=pl.filter(e=>e.type==='maal'||(e.type==='zone'&&e.outcome==='maal')).length;
+    const b=pl.filter(e=>e.type==='bom'||(e.type==='zone'&&e.outcome!=='maal'&&e.type==='zone')).length;
+    const ast=pl.filter(e=>e.type==='assist').length;
+    const tfPas=pl.filter(e=>e.type==='tekfeil'&&e.sub==='Dårlig pasning').length;
+    const tfAng=pl.filter(e=>e.type==='tekfeil'&&e.sub==='Angrepsfeil').length;
+    const tfMot=pl.filter(e=>e.type==='tekfeil'&&e.sub==='Dårlig mottak').length;
+    const tfAnn=pl.filter(e=>e.type==='tekfeil'&&e.sub==='Annen teknisk feil').length;
+    const tfTot=tfPas+tfAng+tfMot+tfAnn;
+    const red=pl.filter(e=>e.type==='redning').length;
+    const s1=pl.filter(e=>e.type==='syvtildelt').length;
+    const s2=pl.filter(e=>e.type==='syvforaarsaket').length;
+    const isGK=games.some(g=>g.homeP.find(p=>p.name===name&&p.isGK));
+    const playerZoneLogs=pl.filter(e=>e.type==='zone');
+
+    // Tekfeil accordion body
+    const tfRows=[
+      tfPas>0?`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span>🤾 Dårlig pasning</span><b style="color:var(--yellow)">${tfPas}</b></div>`:'',
+      tfAng>0?`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span>🚫 Angrepsfeil</span><b style="color:var(--yellow)">${tfAng}</b></div>`:'',
+      tfMot>0?`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span>✋ Dårlig mottak</span><b style="color:var(--yellow)">${tfMot}</b></div>`:'',
+      tfAnn>0?`<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>⚠ Annen</span><b style="color:var(--yellow)">${tfAnn}</b></div>`:'',
+    ].filter(Boolean).join('');
+
+    const tfAccordion = tfTot>0 ? `
+      <div class="acc-hdr">
+        <span class="acc-title">⚠ Tekniske feil (${tfTot})</span>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div style="padding:6px 4px;font-size:.85rem;">${tfRows}</div>
+      </div>` : '';
+
+    html+=`<div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+        <span style="font-family:var(--fd);font-weight:800;font-size:1rem;">${name}${isGK?' 🧤':''}</span>
+        <span style="font-size:.78rem;color:var(--muted);font-family:var(--fd);">${kamps} kamp${kamps!==1?'er':''}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;font-family:var(--fd);font-size:.85rem;margin-bottom:${(tfTot>0||playerZoneLogs.length>0)?'8px':'0'};">
+        <span>Mål: <b style="color:var(--green)">${m}</b></span>
+        <span>Bom: <b style="color:var(--red)">${b}</b></span>
+        ${ast>0?`<span>Assist: <b style="color:var(--purple)">${ast}</b></span>`:''}
+        ${isGK&&red>0?`<span>Redninger: <b style="color:var(--blue)">${red}</b></span>`:''}
+        ${s1>0?`<span>7m tild.: <b>${s1}</b></span>`:''}
+        ${s2>0?`<span>7m forår.: <b>${s2}</b></span>`:''}
+      </div>
+      ${tfAccordion}
+      ${zoneAccordion('p-'+ni, '🎯 Skuddsoner', playerZoneLogs, false)}
+    </div>`;
+  });
+  // Overall home zone accordion
+  html += zoneAccordion('hzone-total', '🎯 Skuddsoner — hjemmelag totalt',
+    allLogs.filter(e=>e.t==='home'&&e.type==='zone'), false);
+  html += '</div>';
+
+  // ── Keeper total ──
+  const gkNames=[...new Set(games.flatMap(g=>g.homeP.filter(p=>p.isGK).map(p=>p.name)))];
+  if(gkNames.length){
+    html+=`<div class="ss2"><div class="stitle">Keeperstatistikk — totalt</div><div style="overflow-x:auto"><table class="st"><thead><tr>
+      <th>Keeper</th><th>Skudd mot</th><th>Redninger</th><th>Bom</th><th>Innlagt</th><th>Red.%</th>
+    </tr></thead><tbody>`;
+    gkNames.forEach(name=>{
+      const shots=allLogs.filter(e=>e.t==='away'&&e.type==='zone'&&e.kName===name);
+      const inn=shots.filter(e=>e.outcome==='maal').length;
+      const red=shots.filter(e=>e.outcome==='redning').length;
+      const bom=shots.filter(e=>e.outcome==='bom').length;
+      const tot=shots.length; const base=red+inn;
+      html+=`<tr>
+        <td>${name} 🧤</td><td class="nc">${tot}</td>
+        <td class="nc" style="color:var(--green)">${red}</td>
+        <td class="nc" style="color:var(--yellow)">${bom}</td>
+        <td class="nc" style="color:var(--red)">${inn}</td>
+        <td class="nc" style="color:var(--blue)">${base>0?Math.round(red/base*100)+'%':'—'}</td>
+      </tr>`;
+    });
+    html+='</tbody></table></div>';
+    html += zoneAccordion('azone-total', '🎯 Skuddsoner imot — hjemmelags keepere (totalt)',
+      allLogs.filter(e=>e.t==='away'&&e.type==='zone'), true);
+    html += '</div>';
+  }
+
+  // ── Away teams ──
+  html+=`<div class="ss2"><div class="stitle">Bortelag — per motstanderlag</div>`;
+  awayTeamNames.forEach((aName,ai)=>{
+    const gamesVs=games.filter(g=>g.awayName===aName);
+    const logsVs=allLogs.filter(e=>e.awayName===aName);
+    const aGoals=logsVs.filter(e=>e.t==='away'&&(e.type==='maal'||(e.type==='zone'&&e.outcome==='maal'))).length;
+    const hGoals=logsVs.filter(e=>e.t==='home'&&(e.type==='maal'||(e.type==='zone'&&e.outcome==='maal'))).length;
+    const shots=logsVs.filter(e=>e.t==='away'&&e.type==='zone');
+    const tot=shots.length;
+    const shotGoals=shots.filter(e=>e.outcome==='maal').length;
+    html+=`<div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+        <span style="font-family:var(--fd);font-weight:800;font-size:1rem;">${aName}</span>
+        <span style="font-size:.78rem;color:var(--muted);font-family:var(--fd);">${gamesVs.length} kamp${gamesVs.length!==1?'er':''}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;font-family:var(--fd);font-size:.85rem;">
+        <span>Mål scoret: <b style="color:var(--red)">${aGoals}</b></span>
+        <span>Mål imot: <b style="color:var(--green)">${hGoals}</b></span>
+        <span>Skudd: <b>${tot}</b> (${tot>0?Math.round(shotGoals/tot*100)+'%':'—'})</span>
+      </div>
+      ${zoneAccordion('away-zone-'+ai, '🎯 Skuddsoner — '+aName, shots, true)}
+    </div>`;
+  });
+  html += '</div>';
+
+  el.innerHTML = html;
+
+  // Bind accordion toggles
+  el.querySelectorAll('.acc-hdr').forEach(hdr=>{
+    hdr.addEventListener('click', ()=>{
+      const body = hdr.nextElementSibling;
+      const arrow = hdr.querySelector('.acc-arrow');
+      body.classList.toggle('open');
+      arrow.classList.toggle('open');
+    });
+  });
+}
+
+function zoneAccordion(id, title, zoneLogs, isAway) {
+  // Only show zones that have at least one shot
+  const activeZones = ZONES.filter(z => zoneLogs.some(e=>e.zone===z));
+  if (!activeZones.length) return `
+    <div class="acc-hdr">
+      <span class="acc-title">${title}</span>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <p style="color:var(--muted);font-size:.82rem;padding:8px 4px;">Ingen skudd registrert.</p>
+    </div>`;
+
+  let rows = activeZones.map(z=>{
+    const zl=zoneLogs.filter(e=>e.zone===z);
+    const m=zl.filter(e=>e.outcome==='maal').length;
+    const b=zl.filter(e=>e.outcome==='bom').length;
+    const r=zl.filter(e=>e.outcome==='redning').length;
+    const t=m+b+r;
+    if(isAway){
+      return `<tr><td>${z}</td>
+        <td class="nc" style="color:var(--green)">${m}</td>
+        <td class="nc" style="color:var(--yellow)">${b}</td>
+        <td class="nc" style="color:var(--blue)">${r}</td>
+        <td class="nc">${t}</td>
+        <td class="nc">${t>0?Math.round(m/t*100)+'%':'—'}</td></tr>`;
+    } else {
+      const nm=b+r;
+      return `<tr><td>${z}</td>
+        <td class="nc" style="color:var(--green)">${m}</td>
+        <td class="nc" style="color:var(--red)">${nm}</td>
+        <td class="nc">${t}</td>
+        <td class="nc">${t>0?Math.round(m/t*100)+'%':'—'}</td></tr>`;
+    }
+  }).join('');
+
+  const thead = isAway
+    ? '<tr><th>Sone</th><th>Mål</th><th>Bom</th><th>Redning</th><th>Totalt</th><th>%</th></tr>'
+    : '<tr><th>Sone</th><th>Mål</th><th>Ikke mål</th><th>Totalt</th><th>%</th></tr>';
+
+  return `
+    <div class="acc-hdr">
+      <span class="acc-title">${title}</span>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <div style="overflow-x:auto;margin-top:4px;">
+        <table class="st"><thead>${thead}</thead><tbody>${rows}</tbody></table>
+      </div>
+    </div>`;
+}
+
+// ──────────────────────────────────────────────
+// EXPORT CSV
+// ──────────────────────────────────────────────
+function exportCSV(id) {
+  let g=id?lsGet(LS_GAMES).find(x=>x.id===id):null;
+  const log=g?g.log:S.log;
+  const hn=g?g.homeName:S.homeName;
+  const an=g?g.awayName:S.awayName;
+  const name=g?g.name:'kamp';
+  let csv='Tid,Omgang,Lag,Spiller,Nummer,Hendelse,Undertype,Sone,Utfall,Keeper\n';
+  [...log].reverse().forEach(e=>{
+    const tn=e.t==='home'?hn:an;
+    csv+=`${e.time||e.time||''},${e.period||''},"${tn}","${e.pName}",${e.pNum},${e.type},${e.sub||''},${e.zone||''},${e.outcome||''},${e.kName||''}\n`;
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=name.replace(/[^a-zA-Z0-9æøåÆØÅ _-]/g,'_')+'_stats.csv';
+  a.click();
+}
+
+// ──────────────────────────────────────────────
+// RESET
+// ──────────────────────────────────────────────
+function resetMatch() {
+  confirmDlg('Nullstille kampen? All statistikk slettes.', ()=>{
+    S.hScore=0; S.aScore=0; S.log=[];
+    S.selH=null; S.selA=null;
+    S.period=1; S.status='active'; S.ht={h:0,a:0};
+    updateScoreDisplay(); bindMatchButtons(); setPeriodBadge();
+    renderPG('home'); renderPG('away');
+    renderStats(); renderLog();
+    toast('↺ Kamp nullstilt');
+  });
+}
+
+// ──────────────────────────────────────────────
+// HELPERS
+// ──────────────────────────────────────────────
+const esc = s => s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+function confirmDlg(msg, onYes) {
+  document.getElementById('confirmMsg').textContent = msg;
+  openPop('confirmPop');
+  const yes = document.getElementById('confirmYes');
+  const no  = document.getElementById('confirmNo');
+  const cleanup = () => { yes.replaceWith(yes.cloneNode(true)); no.replaceWith(no.cloneNode(true)); closePop('confirmPop'); };
+  document.getElementById('confirmYes').addEventListener('click', () => { cleanup(); onYes(); }, {once:true});
+  document.getElementById('confirmNo').addEventListener('click',  () => { cleanup(); },             {once:true});
+}
+
+// ──────────────────────────────────────────────
+// TOAST
+// ──────────────────────────────────────────────
+let toastT;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'),2300);
+}
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+renderHomeSquadList();
+renderAwaySquadList();
+bindMatchButtons();
+setPeriodBadge();
+</script>
+</body>
+</html>

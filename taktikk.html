@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taktikkoversikt</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--surface:#161a22;--card:#1e2430;--border:#2a3040;
+  --accent:#e8321a;--a2:#f7931e;--green:#22c55e;--red:#ef4444;
+  --blue:#3b82f6;--yellow:#eab308;--purple:#8b5cf6;--teal:#14b8a6;
+  --text:#f0f2f5;--muted:#6b7a94;
+  --fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;}
+
+header{background:var(--surface);border-bottom:2px solid var(--accent);padding:0 14px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;gap:10px;}
+.logo{font-family:var(--fd);font-weight:800;font-size:1.15rem;letter-spacing:.04em;white-space:nowrap;}
+.logo span{color:var(--accent);}
+.back-btn{background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--fd);font-weight:700;font-size:.8rem;letter-spacing:.05em;padding:5px 12px;text-transform:uppercase;text-decoration:none;white-space:nowrap;}
+.back-btn:hover{border-color:var(--muted);}
+
+main{padding:14px;max-width:700px;margin:0 auto;}
+
+.btn{background:var(--accent);border:none;border-radius:4px;color:#fff;cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.82rem;letter-spacing:.05em;padding:7px 14px;text-transform:uppercase;transition:opacity .15s;white-space:nowrap;}
+.btn:hover{opacity:.85;}
+.btn.sec{background:var(--card);border:1px solid var(--border);color:var(--text);}
+.btn.dng{background:var(--red);}
+.btn.grn{background:var(--green);}
+.btn.blu{background:var(--blue);}
+
+/* FORM */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:18px;}
+.stitle{font-family:var(--fd);font-size:1rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.lbl{font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;margin-top:10px;display:block;}
+.lbl:first-child{margin-top:0;}
+input[type=text],select,textarea{background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--fb);font-size:.86rem;padding:7px 9px;width:100%;transition:border-color .15s;}
+input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+select option{background:var(--surface);}
+textarea{resize:vertical;min-height:80px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:480px){.row2{grid-template-columns:1fr;}}
+
+/* FORMATIONS */
+.formations{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.fc-label{display:flex;align-items:center;gap:5px;font-size:.85rem;cursor:pointer;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:5px 10px;transition:all .12s;user-select:none;}
+.fc-label:hover{border-color:var(--muted);}
+.fc-label input{accent-color:var(--a2);width:14px;height:14px;cursor:pointer;}
+.fc-label.checked{border-color:var(--a2);background:rgba(247,147,30,.12);color:var(--a2);font-weight:600;}
+
+/* STEPS INPUT */
+.steps-list{margin-top:4px;}
+.step-row{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}
+.step-row:last-child{border-bottom:none;}
+.step-num{font-family:var(--fd);font-weight:800;font-size:.9rem;color:var(--a2);min-width:22px;padding-top:8px;}
+.step-row textarea{flex:1;min-height:46px;font-size:.84rem;padding:5px 8px;}
+.step-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:2px 4px;border-radius:3px;transition:color .12s;flex-shrink:0;margin-top:8px;}
+.step-del:hover{color:var(--red);}
+.add-step-btn{background:none;border:1px dashed var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.78rem;padding:6px 12px;width:100%;margin-top:6px;transition:all .12s;text-transform:uppercase;letter-spacing:.06em;}
+.add-step-btn:hover{border-color:var(--muted);color:var(--text);}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.filter-btn{background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-family:var(--fd);font-weight:700;font-size:.74rem;letter-spacing:.05em;padding:4px 9px;transition:all .12s;text-transform:uppercase;}
+.filter-btn.on,.filter-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+.search-input{background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--fb);font-size:.83rem;padding:5px 9px;width:100%;max-width:200px;}
+.search-input:focus{outline:none;border-color:var(--accent);}
+
+/* TACTIC CARDS */
+.tactic-card{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:7px;overflow:hidden;}
+.tactic-header{padding:10px 13px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;user-select:none;}
+.tactic-header:hover{background:rgba(255,255,255,.025);}
+.tactic-name{font-family:var(--fd);font-weight:800;font-size:1.05rem;margin-bottom:4px;}
+.tactic-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:3px;}
+.badge{font-family:var(--fd);font-weight:700;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:3px;}
+.badge-cat{background:rgba(59,130,246,.2);color:var(--blue);}
+.badge-form{background:rgba(247,147,30,.15);color:var(--a2);}
+.badge-own{background:rgba(139,92,246,.18);color:var(--purple);}
+.tactic-meta{font-size:.75rem;color:var(--muted);}
+.tactic-actions{display:flex;gap:5px;flex-shrink:0;}
+.chevron{font-size:.7rem;color:var(--muted);margin-top:4px;transition:transform .2s;flex-shrink:0;}
+.chevron.open{transform:rotate(180deg);}
+
+.tactic-body{display:none;padding:10px 13px;border-top:1px solid var(--border);}
+.tactic-body.open{display:block;}
+.tactic-desc{font-size:.86rem;line-height:1.5;margin-bottom:8px;}
+.tactic-steps-title{font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.tactic-steps{list-style:none;}
+.tactic-steps li{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:.85rem;line-height:1.4;}
+.tactic-steps li:last-child{border-bottom:none;}
+.step-n{font-family:var(--fd);font-weight:800;color:var(--a2);min-width:22px;}
+.notes-block{margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:5px;font-size:.83rem;color:var(--muted);border-left:3px solid var(--teal);}
+
+.empty{text-align:center;color:var(--muted);font-size:.88rem;padding:30px 0;}
+
+/* POPUP */
+.pop{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;display:none;align-items:center;justify-content:center;}
+.pop.on{display:flex;}
+.pb{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;width:min(320px,96vw);}
+.pb h3{font-family:var(--fd);font-weight:800;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;text-align:center;}
+
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px 16px;font-family:var(--fd);font-weight:700;font-size:.88rem;z-index:300;transition:transform .25s;pointer-events:none;white-space:nowrap;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">HÅNDBALL<span>TAKTIKK</span></div>
+  <a class="back-btn" href="handball_stats.html">← Statistikk</a>
+</header>
+
+<main>
+
+  <div class="stitle" id="formTitle">Legg til taktikk</div>
+  <div class="form-card">
+
+    <label class="lbl" style="margin-top:0;">Navn</label>
+    <input type="text" id="tName" placeholder="Navn på trekket">
+
+    <div class="row2">
+      <div>
+        <label class="lbl">Kategori</label>
+        <select id="tCat">
+          <option value="">— Velg —</option>
+          <option value="iso">Iso (1v1)</option>
+          <option value="sperre">Sperre</option>
+          <option value="kryss">Kryss</option>
+          <option value="gjennombrudd">Gjennombrudd</option>
+          <option value="kontra">Kontra</option>
+          <option value="7mot6">7 mot 6</option>
+          <option value="7m">7-meter</option>
+          <option value="forsvar">Forsvar</option>
+          <option value="annet">Annet</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Eget lags formasjon</label>
+        <input type="text" id="tOwnForm" placeholder="f.eks. 3-2-1">
+      </div>
+    </div>
+
+    <label class="lbl">Brukes mot forsvar</label>
+    <div class="formations">
+      <label class="fc-label"><input type="checkbox" value="6:0" class="fc"> 6:0</label>
+      <label class="fc-label"><input type="checkbox" value="5:1" class="fc"> 5:1</label>
+      <label class="fc-label"><input type="checkbox" value="4:2" class="fc"> 4:2</label>
+      <label class="fc-label"><input type="checkbox" value="3:2:1" class="fc"> 3:2:1</label>
+      <label class="fc-label"><input type="checkbox" value="3:3" class="fc"> 3:3</label>
+      <label class="fc-label"><input type="checkbox" value="alle" class="fc"> Alle</label>
+    </div>
+
+    <label class="lbl">Beskrivelse</label>
+    <textarea id="tDesc" placeholder="Forklar trekket, posisjoner, timing..."></textarea>
+
+    <label class="lbl">Trinn-for-trinn</label>
+    <div class="steps-list" id="stepsInput"></div>
+    <button class="add-step-btn" onclick="addStepInput()">+ Legg til trinn</button>
+
+    <label class="lbl">Notater / coaching-tips</label>
+    <input type="text" id="tNotes" placeholder="Nøkkelpunkter, vanlige feil...">
+
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn grn" onclick="saveTactic()">💾 Lagre</button>
+      <button class="btn sec" onclick="clearForm()">Tøm</button>
+    </div>
+    <input type="hidden" id="tEditId">
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+    <div class="stitle" style="margin-bottom:0;border:none;">Lagrede taktikker</div>
+    <input type="text" class="search-input" id="searchInput" placeholder="Søk..." oninput="renderList()">
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn on" data-f="">Alle</button>
+    <button class="filter-btn" data-f="iso">Iso</button>
+    <button class="filter-btn" data-f="sperre">Sperre</button>
+    <button class="filter-btn" data-f="kryss">Kryss</button>
+    <button class="filter-btn" data-f="gjennombrudd">Gjennombr.</button>
+    <button class="filter-btn" data-f="kontra">Kontra</button>
+    <button class="filter-btn" data-f="7mot6">7 mot 6</button>
+    <button class="filter-btn" data-f="7m">7-meter</button>
+    <button class="filter-btn" data-f="forsvar">Forsvar</button>
+    <button class="filter-btn" data-f="annet">Annet</button>
+  </div>
+
+  <div id="tacticList"></div>
+
+</main>
+
+<!-- CONFIRM -->
+<div class="pop" id="confirmPop">
+  <div class="pb">
+    <h3 id="confirmMsg" style="font-size:.95rem;text-transform:none;letter-spacing:0;margin-bottom:16px;font-weight:700;"></h3>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn grn" id="confirmYes">✓ Ja</button>
+      <button class="btn sec" id="confirmNo">✕ Nei</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LS = 'hbs_tactics_v2';
+const CAT = {
+  iso:'Iso (1v1)', sperre:'Sperre', kryss:'Kryss', gjennombrudd:'Gjennombrudd',
+  kontra:'Kontra', '7mot6':'7 mot 6', '7m':'7-meter', forsvar:'Forsvar', annet:'Annet'
+};
+
+const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const lsG = () => { try{ return JSON.parse(localStorage.getItem(LS)||'[]'); }catch{ return []; } };
+const lsS = v => localStorage.setItem(LS, JSON.stringify(v));
+
+let currentSteps = [];
+let activeFilter = '';
+
+// ── STEPS INPUT ──
+function addStepInput(text) {
+  currentSteps.push(text||'');
+  renderStepsInput();
+}
+
+function renderStepsInput() {
+  const el = document.getElementById('stepsInput');
+  if (!currentSteps.length) { el.innerHTML = ''; return; }
+  el.innerHTML = currentSteps.map((s, i) => `
+    <div class="step-row">
+      <span class="step-num">${i+1}.</span>
+      <textarea data-si="${i}" placeholder="Beskriv trinn ${i+1}...">${s}</textarea>
+      <button class="step-del" data-sd="${i}">✕</button>
+    </div>`).join('');
+  el.querySelectorAll('textarea[data-si]').forEach(ta =>
+    ta.addEventListener('input', () => currentSteps[+ta.dataset.si] = ta.value));
+  el.querySelectorAll('[data-sd]').forEach(b =>
+    b.addEventListener('click', () => { currentSteps.splice(+b.dataset.sd, 1); renderStepsInput(); }));
+}
+
+// ── FORMATION LABELS ──
+function bindFormationLabels() {
+  document.querySelectorAll('.fc-label').forEach(lbl => {
+    const cb = lbl.querySelector('input');
+    cb.addEventListener('change', () => lbl.classList.toggle('checked', cb.checked));
+  });
+}
+
+// ── SAVE ──
+function saveTactic() {
+  const name = document.getElementById('tName').value.trim();
+  if (!name) { toast('Navn er påkrevd'); return; }
+  const formations = [...document.querySelectorAll('.fc:checked')].map(c => c.value);
+  const tactic = {
+    id:       document.getElementById('tEditId').value || uid(),
+    name,
+    cat:      document.getElementById('tCat').value,
+    ownForm:  document.getElementById('tOwnForm').value.trim(),
+    formations,
+    desc:     document.getElementById('tDesc').value.trim(),
+    steps:    currentSteps.filter(s => s.trim()),
+    notes:    document.getElementById('tNotes').value.trim(),
+    savedAt:  new Date().toLocaleDateString('no')
+  };
+  const arr = lsG();
+  const editId = document.getElementById('tEditId').value;
+  if (editId) {
+    const i = arr.findIndex(t => t.id === editId);
+    if (i >= 0) arr[i] = tactic; else arr.unshift(tactic);
+  } else arr.unshift(tactic);
+  lsS(arr);
+  clearForm();
+  renderList();
+  toast(editId ? '✏ Oppdatert' : '💾 Taktikk lagret');
+}
+
+// ── CLEAR FORM ──
+function clearForm() {
+  ['tName','tOwnForm','tDesc','tNotes','tEditId'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('tCat').value = '';
+  document.querySelectorAll('.fc').forEach(c => { c.checked = false; c.closest('.fc-label').classList.remove('checked'); });
+  currentSteps = [];
+  renderStepsInput();
+  document.getElementById('formTitle').textContent = 'Legg til taktikk';
+}
+
+// ── EDIT ──
+function editTactic(id) {
+  const t = lsG().find(t => t.id === id); if (!t) return;
+  document.getElementById('tName').value = t.name;
+  document.getElementById('tCat').value = t.cat || '';
+  document.getElementById('tOwnForm').value = t.ownForm || '';
+  document.getElementById('tDesc').value = t.desc || '';
+  document.getElementById('tNotes').value = t.notes || '';
+  document.getElementById('tEditId').value = t.id;
+  document.querySelectorAll('.fc').forEach(c => {
+    c.checked = (t.formations||[]).includes(c.value);
+    c.closest('.fc-label').classList.toggle('checked', c.checked);
+  });
+  currentSteps = [...(t.steps||[])];
+  renderStepsInput();
+  document.getElementById('formTitle').textContent = 'Rediger: ' + t.name;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('✏ Redigerer: ' + t.name);
+}
+
+// ── DELETE ──
+function deleteTactic(id) {
+  const t = lsG().find(t => t.id === id); if (!t) return;
+  confirmDlg('Slett "' + t.name + '"?', () => {
+    lsS(lsG().filter(x => x.id !== id));
+    renderList();
+    toast('🗑 Slettet');
+  });
+}
+
+// ── RENDER LIST ──
+function renderList() {
+  const el = document.getElementById('tacticList');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let arr = lsG();
+  if (activeFilter) arr = arr.filter(t => t.cat === activeFilter);
+  if (search) arr = arr.filter(t =>
+    t.name.toLowerCase().includes(search) ||
+    (t.desc||'').toLowerCase().includes(search) ||
+    (t.notes||'').toLowerCase().includes(search) ||
+    (CAT[t.cat]||'').toLowerCase().includes(search)
+  );
+  if (!arr.length) { el.innerHTML = '<div class="empty">Ingen taktikker funnet.</div>'; return; }
+
+  el.innerHTML = arr.map(t => {
+    const catBadge  = t.cat     ? `<span class="badge badge-cat">${CAT[t.cat]||t.cat}</span>` : '';
+    const ownBadge  = t.ownForm ? `<span class="badge badge-own">${t.ownForm}</span>` : '';
+    const formBadges = (t.formations||[]).map(f => `<span class="badge badge-form">${f}</span>`).join('');
+    const steps = (t.steps||[]).filter(s => s.trim());
+    return `<div class="tactic-card">
+      <div class="tactic-header" data-toggle="${t.id}">
+        <div style="flex:1;min-width:0;">
+          <div class="tactic-name">${t.name}</div>
+          <div class="tactic-badges">${catBadge}${ownBadge}${formBadges}</div>
+          <div class="tactic-meta">${steps.length ? steps.length+' trinn · ' : ''}${t.savedAt}</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:5px;">
+          <button class="btn sec" style="padding:4px 9px;font-size:.73rem;" data-edit="${t.id}">✏</button>
+          <button class="btn dng" style="padding:4px 8px;font-size:.73rem;" data-del="${t.id}">🗑</button>
+          <span class="chevron" data-chev="${t.id}">▼</span>
+        </div>
+      </div>
+      <div class="tactic-body" id="body-${t.id}">
+        ${t.desc ? `<div class="tactic-desc">${t.desc}</div>` : ''}
+        ${steps.length ? `
+          <div class="tactic-steps-title">Trinn</div>
+          <ul class="tactic-steps">${steps.map((s,i) =>
+            `<li><span class="step-n">${i+1}.</span><span>${s}</span></li>`).join('')}
+          </ul>` : ''}
+        ${t.notes ? `<div class="notes-block">💡 ${t.notes}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('[data-toggle]').forEach(hdr => {
+    hdr.addEventListener('click', e => {
+      if (e.target.closest('button')) return;
+      const id = hdr.dataset.toggle;
+      document.getElementById('body-'+id).classList.toggle('open');
+      const chev = hdr.querySelector('[data-chev]');
+      if (chev) chev.classList.toggle('open');
+    });
+  });
+  el.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => editTactic(b.dataset.edit)));
+  el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => deleteTactic(b.dataset.del)));
+}
+
+// ── FILTERS ──
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    activeFilter = btn.dataset.f;
+    renderList();
+  });
+});
+
+// ── CONFIRM ──
+function confirmDlg(msg, onYes) {
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmPop').classList.add('on');
+  const y = document.getElementById('confirmYes'), n = document.getElementById('confirmNo');
+  const ny = y.cloneNode(true), nn = n.cloneNode(true);
+  y.replaceWith(ny); n.replaceWith(nn);
+  document.getElementById('confirmYes').addEventListener('click', () => {
+    document.getElementById('confirmPop').classList.remove('on'); onYes();
+  }, {once:true});
+  document.getElementById('confirmNo').addEventListener('click', () =>
+    document.getElementById('confirmPop').classList.remove('on'), {once:true});
+}
+
+// ── TOAST ──
+let toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2300);
+}
+
+// ── INIT ──
+bindFormationLabels();
+renderList();
+</script>
+</body>
+</html>
