@@ -446,8 +446,9 @@ let S = {
   hScore:0, aScore:0,
   selH:null, selA:null,
   log:[], period:1,
-  status:'idle', // idle|active|halftime|ended
-  ht:{h:0,a:0}
+  status:'idle',
+  ht:{h:0,a:0},
+  lastKeeperIdx:null  // remembers last selected keeper index in pool
 };
 
 let zCtx={}, tfCtx={}, assCtx={};
@@ -558,7 +559,7 @@ function saveHomeSquad() {
 function loadHomeSquad(name) {
   const s=lsGet(LS_HOME).find(s=>s.name===name); if(!s) return;
   document.getElementById('homeTeamName').value=s.name;
-  S.homeP=s.players.map(p=>({...p,id:uid()}));
+  S.homeP=sortByNum(s.players.map(p=>({...p,id:uid()})));
   renderPlayerList('home'); renderHomeSquadList(); toast('📂 "'+name+'" lastet');
 }
 function deleteHomeSquad(name) {
@@ -618,12 +619,26 @@ function renderAwaySquadList() {
 // ──────────────────────────────────────────────
 // PLAYER SETUP
 // ──────────────────────────────────────────────
+// Sort players by number numerically, non-numeric last
+function sortByNum(arr) {
+  return [...arr].sort((a,b)=>{
+    const na=parseInt(a.num), nb=parseInt(b.num);
+    if(isNaN(na)&&isNaN(nb)) return a.num.localeCompare(b.num);
+    if(isNaN(na)) return 1;
+    if(isNaN(nb)) return -1;
+    return na-nb;
+  });
+}
+
 function addPlayer(t) {
   const numEl=document.getElementById(t==='home'?'homeNum':'awayNum');
   const nameEl=document.getElementById(t==='home'?'homeName':'awayName');
   const nm=numEl.value.trim(), n=nameEl.value.trim(); if(!n) return;
   (t==='home'?S.homeP:S.awayP).push({id:uid(),num:nm||'?',name:n,isGK:false,inSquad:true});
-  numEl.value=''; nameEl.value=''; renderPlayerList(t);
+  numEl.value=''; nameEl.value='';
+  if(t==='home') S.homeP=sortByNum(S.homeP);
+  else S.awayP=sortByNum(S.awayP);
+  renderPlayerList(t);
 }
 function removePlayer(t,id) {
   if(t==='home') S.homeP=S.homeP.filter(p=>p.id!==id);
@@ -654,7 +669,7 @@ function startMatch() {
   S.awayName=document.getElementById('awayTeamName').value||'Bortelag';
   S.homeP.forEach(p=>{ if(p.inSquad===undefined) p.inSquad=true; });
   S.period=1; S.status='active'; S.hScore=0; S.aScore=0;
-  S.selH=null; S.selA=null; S.log=[]; S.ht={h:0,a:0};
+  S.selH=null; S.selA=null; S.log=[]; S.ht={h:0,a:0}; S.lastKeeperIdx=null;
   updateScoreDisplay(); bindMatchButtons(); setPeriodBadge();
   renderPG('home'); renderPG('away'); updateLabels();
   goPage('kamp'); toast('▶ Kamp startet!');
@@ -830,14 +845,26 @@ function openZone(t) {
   if(t==='away') {
     kw.style.display='';
     bBom.textContent='✖ Bom (skytter)'; bRed.style.display='';
-    const gks=S.homeP.filter(p=>p.isGK);
-    const pool=gks.length?gks:S.homeP;
+    // Pool: GK players in squad, sorted by number; fall back to all squad players
+    const squadHome=S.homeP.filter(p=>p.inSquad!==false);
+    const gks=sortByNum(squadHome.filter(p=>p.isGK));
+    const pool=gks.length?gks:sortByNum(squadHome);
     zCtx.kPool=pool;
+
+    // Determine initial selection:
+    // 1) If only one keeper in pool → auto-select
+    // 2) Otherwise → use lastKeeperIdx if valid
+    let initIdx=null;
+    if(pool.length===1) initIdx=0;
+    else if(S.lastKeeperIdx!==null && S.lastKeeperIdx<pool.length) initIdx=S.lastKeeperIdx;
+    zCtx.kIdx=initIdx;
+
     document.getElementById('keeperBtns').innerHTML=pool.length
-      ? pool.map((k,i)=>`<button class="kb" data-ki="${i}">${k.num} ${k.name}${k.isGK?' 🧤':''}</button>`).join('')
+      ? pool.map((k,i)=>`<button class="kb${i===initIdx?' on':''}" data-ki="${i}">${k.num} ${k.name}${k.isGK?' 🧤':''}</button>`).join('')
       : '<span style="color:var(--muted);font-size:.8rem;">Ingen keepere</span>';
     document.querySelectorAll('.kb').forEach(b=>b.addEventListener('click',()=>{
       zCtx.kIdx=parseInt(b.dataset.ki);
+      S.lastKeeperIdx=zCtx.kIdx;
       document.querySelectorAll('.kb').forEach(x=>x.classList.remove('on'));
       b.classList.add('on');
     }));
@@ -864,6 +891,8 @@ function confirmZone(outcome) {
   const {t,p,zone,kPool,kIdx}=zCtx;
   if(!zone) return;
   const keeper=kIdx!==null&&kIdx!==undefined?kPool[kIdx]:null;
+  // Remember this keeper for next time
+  if(keeper&&t==='away') S.lastKeeperIdx=kIdx;
   const e={
     id:uid(),t,type:'zone',sub:null,
     pName:p.name,pNum:p.num,pId:p.id,
@@ -955,8 +984,9 @@ function renderStats() {
     <div class="smc"><div class="sl">Mål borte</div><div class="sv" style="color:var(--green)">${am}</div></div>
     <div class="smc"><div class="sl">Bom borte</div><div class="sv" style="color:var(--red)">${ab}</div></div>`;
 
-  // Player table
-  document.getElementById('hStatBody').innerHTML=S.homeP.map(p=>{
+  // Player table — only squad players, sorted by number
+  const squadForStats = sortByNum(S.homeP.filter(p=>p.inSquad!==false));
+  document.getElementById('hStatBody').innerHTML=squadForStats.map(p=>{
     const pl=S.log.filter(e=>e.t==='home'&&e.pId===p.id);
     const m=pl.filter(e=>e.type==='maal'||(e.type==='zone'&&e.outcome==='maal')).length;
     const b=pl.filter(e=>e.type==='bom'||(e.type==='zone'&&e.outcome!=='maal'&&e.type==='zone')).length;
@@ -975,9 +1005,9 @@ function renderStats() {
     </tr>`;
   }).join('')||'<tr><td colspan="11" style="color:var(--muted);text-align:center;padding:10px">Ingen spillere</td></tr>';
 
-  // Keeper table
+  // Keeper table — only GK players in squad, sorted by number
   const azs=S.log.filter(e=>e.t==='away'&&e.type==='zone');
-  const gks=S.homeP.filter(p=>p.isGK);
+  const gks=sortByNum(S.homeP.filter(p=>p.isGK&&p.inSquad!==false));
   document.getElementById('kStatBody').innerHTML=gks.length?gks.map(p=>{
     const sh=azs.filter(e=>e.kId===p.id);
     const inn=sh.filter(e=>e.outcome==='maal').length;
