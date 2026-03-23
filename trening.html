@@ -404,12 +404,16 @@ function renderPlanDrillList() {
   el.innerHTML=currentPlanDrills.map((item,i)=>{
     const d=drills.find(x=>x.id===item.drillId);
     if(!d) return '';
-    return `<div class="plan-drill-row" draggable="true" data-idx="${i}">
-      <span class="drag-handle" title="Dra for å flytte">⠿</span>
+    return `<div class="plan-drill-row" data-idx="${i}">
+      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
+        <button style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;font-size:.7rem;padding:1px 5px;line-height:1.2;" data-up="${i}" ${i===0?'disabled style="opacity:.3;cursor:default;"':''}>▲</button>
+        <button style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;font-size:.7rem;padding:1px 5px;line-height:1.2;" data-dn="${i}" ${i===currentPlanDrills.length-1?'disabled style="opacity:.3;cursor:default;"':''}>▼</button>
+      </div>
       <span class="plan-drill-num">${i+1}.</span>
       <div class="plan-drill-info">
         <span class="cat cat-${d.cat}" style="font-size:.68rem;">${CAT_LABELS[d.cat]}</span>
         <strong style="font-family:var(--fd);font-size:.9rem;">${d.name}</strong>
+        ${d.players?`<span style="font-size:.75rem;color:var(--muted);margin-left:4px;">👥 ${d.players}</span>`:''}
       </div>
       <span class="plan-drill-dur">
         <input type="number" value="${item.customDur||d.dur}" min="1" max="120"
@@ -419,8 +423,20 @@ function renderPlanDrillList() {
       <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 3px;" data-rm="${i}">✕</button>
     </div>`;
   }).join('');
-  el.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{ currentPlanDrills.splice(parseInt(b.dataset.rm),1); renderPlanDrillList(); }));
-  setupDragDrop(el);
+
+  el.querySelectorAll('[data-up]').forEach(b=>b.addEventListener('click',()=>{
+    const i=parseInt(b.dataset.up); if(i===0) return;
+    [currentPlanDrills[i-1],currentPlanDrills[i]]=[currentPlanDrills[i],currentPlanDrills[i-1]];
+    renderPlanDrillList();
+  }));
+  el.querySelectorAll('[data-dn]').forEach(b=>b.addEventListener('click',()=>{
+    const i=parseInt(b.dataset.dn); if(i>=currentPlanDrills.length-1) return;
+    [currentPlanDrills[i+1],currentPlanDrills[i]]=[currentPlanDrills[i],currentPlanDrills[i+1]];
+    renderPlanDrillList();
+  }));
+  el.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{
+    currentPlanDrills.splice(parseInt(b.dataset.rm),1); renderPlanDrillList();
+  }));
   updateTotalTime();
 }
 
@@ -438,24 +454,6 @@ function updateTotalTime() {
   const el=document.getElementById('planTotalTime');
   document.getElementById('totalMin').textContent=total;
   el.style.display=currentPlanDrills.length?'flex':'none';
-}
-
-function setupDragDrop(el) {
-  let dragIdx=null;
-  el.querySelectorAll('[draggable]').forEach(row=>{
-    row.addEventListener('dragstart',()=>{ dragIdx=parseInt(row.dataset.idx); row.style.opacity='.4'; });
-    row.addEventListener('dragend',()=>{ row.style.opacity='1'; dragIdx=null; });
-    row.addEventListener('dragover',e=>{ e.preventDefault(); row.style.background='rgba(59,130,246,.1)'; });
-    row.addEventListener('dragleave',()=>row.style.background='');
-    row.addEventListener('drop',e=>{ e.preventDefault(); row.style.background='';
-      const toIdx=parseInt(row.dataset.idx);
-      if(dragIdx!==null&&dragIdx!==toIdx){
-        const item=currentPlanDrills.splice(dragIdx,1)[0];
-        currentPlanDrills.splice(toIdx,0,item);
-        renderPlanDrillList();
-      }
-    });
-  });
 }
 
 function openDrillPicker() {
